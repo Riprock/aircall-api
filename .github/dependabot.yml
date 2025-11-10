@@ -3,11 +3,12 @@ updates:
   # Python dependencies via uv
   - package-ecosystem: "uv"
     directory: "/"
+    target-branch: "development"
     schedule:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
-    reviewers:
+    assignees:
       - "Riprock"
     labels:
       - "dependencies"
@@ -23,7 +24,7 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 3
-    reviewers:
+    assignees:
       - "Riprock"
     labels:
       - "dependencies"

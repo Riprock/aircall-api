@@ -12,7 +12,7 @@ class NumberResource(BaseResource):
     retrieving, updating, and checking registration status.
     """
 
-    def list(self, page: int = 1, per_page: int = 20) -> list[Number]:
+    def list_numbers(self, page: int = 1, per_page: int = 20) -> list[Number]:
         """
         List all numbers with pagination.
 
@@ -32,7 +32,7 @@ class NumberResource(BaseResource):
             - previous_page_link: URL to previous page (if available)
 
         Example:
-            >>> numbers = client.number.list(page=1, per_page=50)
+            >>> numbers = client.number.list_numbers(page=1, per_page=50)
             >>> for number in numbers:
             ...     print(number.name, number.digits)
         """

@@ -8,7 +8,7 @@ class CallResource(BaseResource):
 
     Handles operations relating to calls including status, voicemails, insights and summaries
     """
-    def list(self, page: int = 1, per_page: int = 20) -> list[Call]:
+    def list_calls(self, page: int = 1, per_page: int = 20) -> list[Call]:
         """
         List all calls with pagination.
 
