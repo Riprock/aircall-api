@@ -10,7 +10,7 @@ class UserResource(BaseResource):
     Handles operations relating to users including availability and outbound calls.
     """
 
-    def list(self, page: int = 1, per_page: int = 20) -> list[User]:
+    def list_users(self, page: int = 1, per_page: int = 20) -> list[User]:
         """
         List all users with pagination.
 

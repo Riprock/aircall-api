@@ -11,7 +11,7 @@ class TagResource(BaseResource):
     Note: Emojis cannot be used in tag attributes and will be removed.
     """
 
-    def list(self, page: int = 1, per_page: int = 20) -> list[Tag]:
+    def list_tags(self, page: int = 1, per_page: int = 20) -> list[Tag]:
         """
         List all tags with pagination.
 

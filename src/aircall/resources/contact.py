@@ -10,7 +10,7 @@ class ContactResource(BaseResource):
     Handles operations relating to contacts including phone numbers and emails.
     """
 
-    def list(self, page: int = 1, per_page: int = 20) -> list[Contact]:
+    def list_contacts(self, page: int = 1, per_page: int = 20) -> list[Contact]:
         """
         List all contacts with pagination.
 

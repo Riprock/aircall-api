@@ -11,7 +11,7 @@ class WebhookResource(BaseResource):
     Use the token field to authenticate incoming webhook requests.
     """
 
-    def list(self, page: int = 1, per_page: int = 20) -> list[Webhook]:
+    def list_webhooks(self, page: int = 1, per_page: int = 20) -> list[Webhook]:
         """
         List all webhooks with pagination.
 

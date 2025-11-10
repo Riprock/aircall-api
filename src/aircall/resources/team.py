@@ -11,7 +11,7 @@ class TeamResource(BaseResource):
     Team names must be unique within a company (max 64 characters).
     """
 
-    def list(self, page: int = 1, per_page: int = 20) -> list[Team]:
+    def list_teams(self, page: int = 1, per_page: int = 20) -> list[Team]:
         """
         List all teams with pagination.
 
