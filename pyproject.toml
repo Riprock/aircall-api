@@ -1,0 +1,37 @@
+[project]
+name = "aircall-api"
+version = "0.1.0"
+description = "Python API Built to connect with aircall.io API Endpoints"
+readme = "README.md"
+requires-python = ">=3.13"
+license = "MIT"
+keywords = [
+    "aircall",
+    "api",
+    "telephony",
+    "voip",
+    "phone",
+    "calls",
+    "contacts",
+    "sms",
+    "messaging",
+    "client",
+    "sdk",
+]
+dependencies = [
+    "pydantic>=2.12.4",
+    "requests>=2.32.5",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Riprock/aircall-api"
+"Bug Tracker" = "https://github.com/Riprock/aircall-api/issues"
+"Documentation" = "https://github.com/Riprock/aircall-api#readme"
+"Repository" = "https://github.com/Riprock/aircall-api"
+
+[dependency-groups]
+dev = [
+    "pylint>=4.0.2",
+    "pytest>=8.4.2",
+    "ruff>=0.14.3",
+]

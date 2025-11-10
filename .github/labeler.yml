@@ -1,0 +1,37 @@
+# Auto-label PRs based on changed files
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.md', 'docs/**/*']
+
+client:
+  - changed-files:
+    - any-glob-to-any-file: ['src/aircall/client.py']
+
+resources:
+  - changed-files:
+    - any-glob-to-any-file: ['src/aircall/resources/**/*']
+
+models:
+  - changed-files:
+    - any-glob-to-any-file: ['src/aircall/models/**/*']
+
+exceptions:
+  - changed-files:
+    - any-glob-to-any-file: ['src/aircall/exceptions.py']
+
+logging:
+  - changed-files:
+    - any-glob-to-any-file: ['src/aircall/logging_config.py']
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: ['pyproject.toml', 'uv.lock']
+
+github-actions:
+  - changed-files:
+    - any-glob-to-any-file: ['.github/workflows/**/*']
+
+tests:
+  - changed-files:
+    - any-glob-to-any-file: ['tests/**/*']

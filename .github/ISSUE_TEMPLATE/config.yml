@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Aircall API Documentation
+    url: https://developer.aircall.io/
+    about: Official Aircall API documentation
+  - name: Question or Discussion
+    url: https://github.com/Riprock/aircall-api/discussions
+    about: Ask questions and discuss ideas with the community
