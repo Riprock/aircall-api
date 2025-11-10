@@ -11,7 +11,7 @@ from aircall.exceptions import (
     AircallConnectionError,
     AircallTimeoutError,
     AuthenticationError,
-    AircallPermissionError,
+    #AircallPermissionError,
     NotFoundError,
     RateLimitError,
     ServerError,
@@ -137,11 +137,11 @@ class AircallClient:
         url = self.base_url + endpoint
 
         # Log the request details
-        self.logger.debug(f"Request: {method} {url}")
+        self.logger.debug("Request: %s %s", method, url)
         if params:
-            self.logger.debug(f"  Query params: {params}")
+            self.logger.debug("  Query params: %s", params)
         if json:
-            self.logger.debug(f"  Request body: {json}")
+            self.logger.debug("  Request body: %s", json)
 
         start_time = time.time()
 
@@ -157,8 +157,8 @@ class AircallClient:
         except Timeout as e:
             elapsed = time.time() - start_time
             self.logger.error(
-                f"Request timeout: {method} {url} - "
-                f"Failed after {timeout or self.timeout}s (elapsed: {elapsed:.2f}s)"
+                "Request timeout: %s %s - Failed after %ss (elapsed: %.2fs)",
+                method, url, timeout or self.timeout, elapsed
             )
             raise AircallTimeoutError(
                 f"Request to {url} timed out after {timeout or self.timeout} seconds"
@@ -166,7 +166,8 @@ class AircallClient:
         except RequestsConnectionError as e:
             elapsed = time.time() - start_time
             self.logger.error(
-                f"Connection error: {method} {url} - {str(e)} (elapsed: {elapsed:.2f}s)"
+                "Connection error: %s %s - %s (elapsed: %.2fs)",
+                method, url, str(e), elapsed
             )
             raise AircallConnectionError(
                 f"Failed to connect to {url}: {str(e)}"
@@ -177,8 +178,8 @@ class AircallClient:
         # Handle successful responses
         if 200 <= response.status_code < 300:
             self.logger.debug(
-                f"Response: {response.status_code} {method} {url} "
-                f"(took {elapsed:.2f}s)"
+                "Response: %s %s %s (took %.2fs)",
+                response.status_code, method, url, elapsed
             )
             if response.status_code == 204:  # No Content
                 return {}
@@ -202,8 +203,8 @@ class AircallClient:
 
         # Log the error response
         self.logger.warning(
-            f"API error: {status_code} {method} {url} - {error_message} "
-            f"(took {elapsed:.2f}s)"
+            "API error: %s %s %s - %s (took %.2fs)",
+            status_code, method, url, error_message, elapsed
         )
 
         if status_code == 400:
@@ -213,47 +214,50 @@ class AircallClient:
                 status_code=status_code,
                 response_data=error_data
             )
-        elif status_code == 401:
+        if status_code == 401:
             raise AuthenticationError(
                 error_message,
                 status_code=status_code,
                 response_data=error_data
             )
-        elif status_code == 403:
+        if status_code == 403:
             # Forbidden - Invalid API key or Bearer access token
             raise AuthenticationError(
                 error_message,
                 status_code=status_code,
                 response_data=error_data
             )
-        elif status_code == 404:
+        if status_code == 404:
             # Not found - Id does not exist
             raise NotFoundError(
                 error_message,
                 status_code=status_code,
                 response_data=error_data
             )
-        elif status_code == 422:
+        if status_code == 422:
             # Server unable to process the request
             raise UnprocessableEntityError(
                 error_message,
                 status_code=status_code,
                 response_data=error_data
             )
-        elif status_code == 429:
+        if status_code == 429:
             # Rate limit exceeded
             retry_after = response.headers.get('Retry-After')
-            self.logger.warning(
-                f"Rate limit exceeded: {method} {url} - "
-                f"Retry after {retry_after}s" if retry_after else "Rate limit exceeded (no retry-after header)"
-            )
+            if retry_after:
+                self.logger.warning(
+                    "Rate limit exceeded: %s %s - Retry after %ss",
+                    method, url, retry_after
+                )
+            else:
+                self.logger.warning("Rate limit exceeded (no retry-after header)")
             raise RateLimitError(
                 error_message,
                 status_code=status_code,
                 response_data=error_data,
                 retry_after=int(retry_after) if retry_after else None
             )
-        elif 500 <= status_code < 600:
+        if 500 <= status_code < 600:
             # Server errors
             raise ServerError(
                 error_message,

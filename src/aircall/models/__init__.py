@@ -30,7 +30,6 @@ from aircall.models.message import MediaDetail, Message
 from aircall.models.webhook import Webhook
 
 # Campaign and Compliance
-from aircall.models.a2p_campaign_association import A2PCampaignAssociation
 from aircall.models.dialer_campaign import DialerCampaign, DialerCampaignPhoneNumber
 
 # Call-related
@@ -73,7 +72,6 @@ __all__ = [
     "MediaDetail",
     "Webhook",
     # Campaign and Compliance
-    "A2PCampaignAssociation",
     "DialerCampaign",
     "DialerCampaignPhoneNumber",
     # Call-related

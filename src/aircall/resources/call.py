@@ -21,7 +21,7 @@ class CallResource(BaseResource):
         """
         response = self._get("/calls", params={"page": page, "per_page": per_page})
         return [Call(**c) for c in response["calls"]]
-    
+
     def get(self, call_id: int) -> Call:
         """
         Get a specific call by ID.
@@ -60,12 +60,12 @@ class CallResource(BaseResource):
         Returns:
             dict: Transfer response
         """
-        self._logger.info(f"Transferring call {call_id} to number {number_id}")
+        self._logger.info("Transferring call %s to number %s", call_id, number_id)
         data = {"number_id": number_id}
         if comment:
             data["comment"] = comment
         result = self._post(f"/calls/{call_id}/transfers", json=data)
-        self._logger.info(f"Successfully transferred call {call_id}")
+        self._logger.info("Successfully transferred call %s", call_id)
         return result
 
     def add_comment(self, call_id: int, content: str) -> dict:
@@ -152,9 +152,9 @@ class CallResource(BaseResource):
         Returns:
             dict: Delete recording response
         """
-        self._logger.warning(f"Deleting recording for call {call_id}")
+        self._logger.warning("Deleting recording for call %s", call_id)
         result = self._delete(f"/calls/{call_id}/recording")
-        self._logger.info(f"Successfully deleted recording for call {call_id}")
+        self._logger.info("Successfully deleted recording for call %s", call_id)
         return result
 
     def delete_voicemail(self, call_id: int) -> dict:
@@ -167,9 +167,9 @@ class CallResource(BaseResource):
         Returns:
             dict: Delete voicemail response
         """
-        self._logger.warning(f"Deleting voicemail for call {call_id}")
+        self._logger.warning("Deleting voicemail for call %s", call_id)
         result = self._delete(f"/calls/{call_id}/voicemail")
-        self._logger.info(f"Successfully deleted voicemail for call {call_id}")
+        self._logger.info("Successfully deleted voicemail for call %s", call_id)
         return result
 
     def add_insight_cards(self, call_id: int, cards: list[dict]) -> dict:
