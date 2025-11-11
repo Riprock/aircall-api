@@ -104,11 +104,18 @@ contacts = client.contact.list()
 contact = client.contact.create(
     first_name="John",
     last_name="Doe",
-    phone_numbers=["+1234567890"]
+    phone_numbers=[{"label": "Work", "value": "+1234567890"}],
+    emails=[{"label": "Office", "value": "john.doe@example.com"}]
 )
 
 # Update a contact
-client.contact.update(contact_id=12345, email="john.doe@example.com")
+client.contact.update(
+    contact_id=12345,
+    emails=[{"label": "Personal", "value": "john@example.com"}]
+)
+
+# Search for contacts
+contacts = client.contact.search(phone_number="+1234567890")
 ```
 
 #### Working with Numbers

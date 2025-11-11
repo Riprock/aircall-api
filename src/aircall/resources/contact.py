@@ -50,17 +50,49 @@ class ContactResource(BaseResource):
         response = self._get(f"/contacts/{contact_id}")
         return Contact(**response["contact"])
 
-    def create(self, **kwargs) -> Contact:
+    def create(
+        self,
+        first_name: str = None,
+        last_name: str = None,
+        phone_numbers: list[dict] = None,
+        emails: list[dict] = None,
+        **kwargs
+    ) -> Contact:
         """
         Create a new contact.
 
         Args:
-            **kwargs: Contact data (first_name, last_name, phone_numbers, emails, etc.)
+            first_name: Contact's first name
+            last_name: Contact's last name
+            phone_numbers: List of phone number objects with 'label' and 'value' keys
+                Example: [{"label": "Work", "value": "+19001112222"}]
+            emails: List of email objects with 'label' and 'value' keys
+                Example: [{"label": "Office", "value": "john@example.com"}]
+            **kwargs: Additional contact data (information, company_name, etc.)
 
         Returns:
             Contact: The created contact object
+
+        Example:
+            contact = client.contact.create(
+                first_name="John",
+                last_name="Doe",
+                phone_numbers=[{"label": "Work", "value": "+19001112222"}],
+                emails=[{"label": "Office", "value": "john.doe@example.com"}]
+            )
         """
-        response = self._post("/contacts", json=kwargs)
+        data = {}
+        if first_name is not None:
+            data["first_name"] = first_name
+        if last_name is not None:
+            data["last_name"] = last_name
+        if phone_numbers is not None:
+            data["phone_numbers"] = phone_numbers
+        if emails is not None:
+            data["emails"] = emails
+        data.update(kwargs)
+
+        response = self._post("/contacts", json=data)
         return Contact(**response["contact"])
 
     def update(self, contact_id: int, **kwargs) -> Contact:
@@ -69,10 +101,18 @@ class ContactResource(BaseResource):
 
         Args:
             contact_id: The ID of the contact to update
-            **kwargs: Contact fields to update
+            **kwargs: Contact fields to update (first_name, last_name, phone_numbers, emails, etc.)
+                Note: Use 'phone_numbers' and 'emails' as list of dicts with 'label' and 'value' keys
 
         Returns:
             Contact: The updated contact object
+
+        Example:
+            contact = client.contact.update(
+                12345,
+                first_name="Jane",
+                emails=[{"label": "Work", "value": "jane@example.com"}]
+            )
         """
         response = self._post(f"/contacts/{contact_id}", json=kwargs)
         return Contact(**response["contact"])
