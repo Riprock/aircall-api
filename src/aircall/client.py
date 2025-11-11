@@ -183,7 +183,10 @@ class AircallClient:
             )
             if response.status_code == 204:  # No Content
                 return {}
-            return response.json()
+
+            response_data = response.json()
+            self.logger.debug("  Response body: %s", response_data)
+            return response_data
 
         # Parse error response
         error_data = None
@@ -206,6 +209,8 @@ class AircallClient:
             "API error: %s %s %s - %s (took %.2fs)",
             status_code, method, url, error_message, elapsed
         )
+        if error_data:
+            self.logger.debug("  Error response body: %s", error_data)
 
         if status_code == 400:
             # Invalid payload/Bad Request
