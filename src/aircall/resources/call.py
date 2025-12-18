@@ -268,3 +268,12 @@ class CallResource(BaseResource):
             dict: Playbook result data
         """
         return self._get(f"/calls/{call_id}/playbook_result")
+
+    def get_evaluation(self, call_id: int) -> dict:
+        """
+        Use this endpoint to retrieve the evaluations for a specific call.
+
+        Args:
+            call_id: The ID of the call
+        """
+        return self._get(f"/calls/{call_id}/evaluation")
