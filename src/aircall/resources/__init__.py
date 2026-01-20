@@ -12,6 +12,7 @@ from aircall.resources.tag import TagResource
 from aircall.resources.team import TeamResource
 from aircall.resources.user import UserResource
 from aircall.resources.webhook import WebhookResource
+from aircall.resources.userv2 import UserV2Resource
 
 __all__ = [
     "BaseResource",
@@ -26,4 +27,5 @@ __all__ = [
     "TeamResource",
     "UserResource",
     "WebhookResource",
+    "UserV2Resource"
 ]

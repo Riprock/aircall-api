@@ -29,7 +29,8 @@ from aircall.resources import (
     TagResource,
     TeamResource,
     UserResource,
-    WebhookResource,
+    UserV2Resource,
+    WebhookResource
 )
 
 
@@ -63,6 +64,7 @@ class AircallClient:
                     When True, sets the logger level to DEBUG
         """
         self.base_url = "https://api.aircall.io/v1"
+        self.base_url_v2 = "https://api.aircall.io/v2"
         credentials = base64.b64encode(f"{api_id}:{api_token}".encode()).decode('utf-8')
         self.timeout = timeout
 
@@ -100,6 +102,7 @@ class AircallClient:
         self.tag = TagResource(self)
         self.team = TeamResource(self)
         self.user = UserResource(self)
+        self.userv2 = UserV2Resource(self)
         self.webhook = WebhookResource(self)
 
     def _request(

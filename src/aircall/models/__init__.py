@@ -8,6 +8,7 @@ from aircall.models.number import Number, NumberMessages
 from aircall.models.tag import Tag
 from aircall.models.team import Team
 from aircall.models.user import User, UserAvailability
+from aircall.models.userv2 import UserV2, UserV2Availability
 
 # AI and Intelligence
 from aircall.models.ai_voice_agent import AIVoiceAgent
@@ -46,6 +47,8 @@ __all__ = [
     # Core resources
     "User",
     "UserAvailability",
+    "UserV2",
+    "UserV2Availability",
     "Call",
     "CallComment",
     "Contact",
