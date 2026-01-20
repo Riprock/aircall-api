@@ -66,64 +66,15 @@ class UserV2Resource(BaseResource):
         response = self._put(f"/users/{user_id}", json=kwargs)
         return User(**response["user"])
 
-    def delete(self, user_id: int) -> dict:
+    def get_numbers(self, user_id: int) -> list[int]:
         """
-        Delete a user.
-
-        Args:
-            user_id: The ID of the user to delete
-
-        Returns:
-            dict: Delete response
-        """
-        return self._delete(f"/users/{user_id}")
-
-    def get_availabilities(self) -> dict:
-        """
-        Retrieve availability status for all users.
-
-        Returns:
-            dict: Dictionary of user availabilities
-        """
-        return self._get("/users/availabilities")
-
-    def get_availability(self, user_id: int) -> UserAvailability:
-        """
-        Check availability of a specific user.
+        Get the list of number IDs assigned to a user.
 
         Args:
             user_id: The ID of the user
 
         Returns:
-            UserAvailability: Granular availability status
+            list[int]: List of number IDs
         """
-        response = self._get(f"/users/{user_id}/availability")
-        return UserAvailability(**response)
-
-    def start_call(self, user_id: int, to: str, **kwargs) -> dict:
-        """
-        Start an outbound call for a user.
-
-        Args:
-            user_id: The ID of the user making the call
-            to: Phone number to call
-            **kwargs: Additional call parameters
-
-        Returns:
-            dict: Call response
-        """
-        data = {"to": to, **kwargs}
-        return self._post(f"/users/{user_id}/calls", json=data)
-
-    def dial(self, user_id: int, **kwargs) -> dict:
-        """
-        Dial a number for a user.
-
-        Args:
-            user_id: The ID of the user
-            **kwargs: Dial parameters
-
-        Returns:
-            dict: Dial response
-        """
-        return self._post(f"/users/{user_id}/dial", json=kwargs)
+        response = self._get(f"/users/{user_id}/numbers")
+        return response["number_ids"]
