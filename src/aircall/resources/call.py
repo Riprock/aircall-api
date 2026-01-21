@@ -276,4 +276,4 @@ class CallResource(BaseResource):
         Args:
             call_id: The ID of the call
         """
-        return self._get(f"/calls/{call_id}/evaluation")
+        return self._get(f"/calls/{call_id}/evaluations")
