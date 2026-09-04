@@ -1,10 +1,9 @@
 """Integration models for Aircall API."""
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
-if TYPE_CHECKING:
-    from aircall.models.user import User
+from aircall.models.user import User
 
 
 class Integration(BaseModel):

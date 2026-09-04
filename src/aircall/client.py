@@ -105,13 +105,34 @@ class AircallClient:
         self.userv2 = UserV2Resource(self)
         self.webhook = WebhookResource(self)
 
+    def _base_url_for(self, version: str) -> str:
+        """
+        Resolve an API version to its root URL.
+
+        Args:
+            version: API version identifier, "v1" or "v2"
+
+        Returns:
+            str: Root URL for that version, without a trailing slash
+
+        Raises:
+            ValueError: When the version is not one Aircall exposes
+        """
+        try:
+            return {"v1": self.base_url, "v2": self.base_url_v2}[version]
+        except KeyError:
+            raise ValueError(
+                f"Unknown Aircall API version {version!r}, expected 'v1' or 'v2'"
+            ) from None
+
     def _request(
         self,
         method: str,
         endpoint: str,
         params: dict = None,
         json: dict = None,
-        timeout: int = None
+        timeout: int = None,
+        version: str = "v1"
     ) -> dict:
         """
         Make an HTTP request to the Aircall API.
@@ -122,11 +143,13 @@ class AircallClient:
             params: Query parameters as dict (e.g., {"page": 1, "per_page": 50})
             json: Request body as dict for POST/PUT requests
             timeout: Request timeout in seconds (uses self.timeout if not specified)
+            version: Aircall API version to route to, "v1" or "v2" (default: "v1")
 
         Returns:
             dict: Parsed JSON response
 
         Raises:
+            ValueError: When an unknown API version is requested
             ValidationError: When request validation fails (400)
             AuthenticationError: When authentication fails (401 or 403)
             NotFoundError: When resource is not found (404)
@@ -137,7 +160,7 @@ class AircallClient:
             AircallTimeoutError: When request times out
             AircallAPIError: For other API errors
         """
-        url = self.base_url + endpoint
+        url = self._base_url_for(version) + endpoint
 
         # Log the request details
         self.logger.debug("Request: %s %s", method, url)

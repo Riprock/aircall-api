@@ -1,14 +1,17 @@
 """Resource module for managing users"""
 from aircall.resources.base import BaseResource
-from aircall.models import User, UserAvailability
+from aircall.models import User
 
 
 class UserV2Resource(BaseResource):
     """
-    API Resource for Aircall Users.
+    API Resource for Aircall Users V2.
 
-    Handles operations relating to users including availability and outbound calls.
+    User V2 is the replacement for User V1, which Aircall deprecates on
+    2026-09-30. Every request is routed to /v2; see BaseResource._api_version.
     """
+
+    _api_version = "v2"
 
     def list_users(self, page: int = 1, per_page: int = 20) -> list[User]:
         """

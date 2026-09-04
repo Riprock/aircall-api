@@ -84,3 +84,33 @@ __all__ = [
     # Integration
     "Integration",
 ]
+
+
+# ---------------------------------------------------------------------------
+# Forward reference resolution
+#
+# User and Number reference each other, so one of the two must annotate the
+# relationship as a string forward ref (User.numbers -> list["Number"]) and
+# import the other only under TYPE_CHECKING. Pydantic cannot resolve that ref
+# from user.py's module globals, which leaves User -- and every model built on
+# it (Call, CallComment, Team, Message, Integration) -- incomplete, raising
+# "`User` is not fully defined" on the first validation instead of at import.
+#
+# This module is the one place where every model is in scope, and it always
+# runs before any submodule is importable, so resolve the refs here. Order
+# matters: User must be rebuilt before the models that embed it.
+# Covered by tests/test_models_resolve.py.
+# ---------------------------------------------------------------------------
+for _model in (
+    User,
+    Number,
+    Call,
+    CallComment,
+    Team,
+    Message,
+    Integration,
+    Contact,
+):
+    _model.model_rebuild()
+
+del _model

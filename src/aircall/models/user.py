@@ -24,15 +24,18 @@ class User(BaseModel):
     # Availability fields
     available: bool  # Based on working hours
     availability_status: Literal["available", "custom", "unavailable"]
-    substatus: str  # always_open, always_closed, or specific reason
+    # Omitted from user objects nested inside Call payloads
+    substatus: Optional[str] = None  # always_open, always_closed, or specific reason
 
     # Related resources
     numbers: list["Number"] = []
 
     # Settings
-    time_zone: str  # Default: Etc/UTC
-    language: str  # IETF language tag, default: en-US
-    wrap_up_time: int  # Timer after call ends (seconds)
+    # All three are omitted from abridged user objects nested in other payloads
+    # (Call.user, Call.comments[].posted_by), so they cannot be required.
+    time_zone: Optional[str] = None  # Default: Etc/UTC
+    language: Optional[str] = None  # IETF language tag, default: en-US
+    wrap_up_time: Optional[int] = None  # Timer after call ends (seconds)
 
 
 class UserAvailability(BaseModel):

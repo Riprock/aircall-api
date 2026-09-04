@@ -1,12 +1,11 @@
 """Message models for Aircall API."""
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
-if TYPE_CHECKING:
-    from aircall.models.contact import Contact
-    from aircall.models.number import Number
+from aircall.models.contact import Contact
+from aircall.models.number import Number
 
 
 class MediaDetail(BaseModel):
@@ -26,7 +25,8 @@ class Message(BaseModel):
     id: str
     direct_link: str
     direction: Literal["inbound", "outbound"]
-    external_number: str
+    # Present on webhook payloads (message.received) but not on send responses
+    external_number: Optional[str] = None
     body: str
     status: str
     raw_digits: str

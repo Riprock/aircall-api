@@ -12,3 +12,7 @@ wheels/
 # Environment variables
 .env
 run.py
+
+tools/
+docs/
+rendered-md/
