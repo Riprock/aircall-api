@@ -8,14 +8,23 @@ from aircall.models.participant import Participant
 
 
 class Playbook(BaseModel):
-    """Playbook definition object"""
-    # Define based on actual API response structure
+    """
+    Playbook definition.
+
+    Included in a playbook result only when fetch_playbook=true is passed to
+    CallResource.get_playbook_result().
+    """
+    id: Optional[int] = None
+    name: Optional[str] = None
+    language: Optional[str] = None
 
 
 class PlaybookResultTopic(BaseModel):
-    """Playbook topic result"""
+    """One topic's result within a playbook result"""
     name: str
-    result: Any  # Define more specifically based on API structure
+    # Documented only as placeholder "content"; left permissive rather than
+    # guessing a type Aircall has not specified.
+    result: Any = None
 
 
 class ConversationIntelligence(BaseModel):

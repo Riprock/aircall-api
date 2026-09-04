@@ -53,3 +53,5 @@ class Number(BaseModel):
     users: list["User"] = []
     priority: Optional[int] = None  # null, 0 (no priority), or 1 (top priority)
     messages: Optional[NumberMessages] = None
+    # Whether the Number is managed by the Smartflows editor
+    flow_editor_enabled: Optional[bool] = None

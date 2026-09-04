@@ -4,6 +4,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel
 
+from aircall.models.ai_voice_agent import CallAIVoiceAgent
 from aircall.models.contact import Contact
 from aircall.models.ivr_option import IVROption
 from aircall.models.number import Number
@@ -83,6 +84,10 @@ class Call(BaseModel):
     external_transferred_to: Optional[str] = None  # Only via call.external_transferred event
     external_caller_number: Optional[str] = None  # Only via call.external_transferred event
 
+    # Call ID of the call that requested a callback. Only via call.created,
+    # call.answered, call.archived, call.assigned, call.hungup, call.ended.
+    automatic_callback_call_id: Optional[int] = None
+
     # Collections
     comments: list[CallComment] = []
     tags: list["Tag"] = []
@@ -92,3 +97,7 @@ class Call(BaseModel):
 
     # IVR options (requires fetch_call_timeline query param)
     ivr_options_selected: list["IVROption"] = []
+
+    # AI Voice Agent segments that handled the Call, ordered by start time.
+    # Requires the fetch_aiva_conv query param; empty when no agent was involved.
+    ai_voice_agents: list[CallAIVoiceAgent] = []

@@ -2,14 +2,16 @@
 
 A Python client library for the [Aircall.io](https://aircall.io) API, providing easy access to Aircall's telephony services.
 
+Covers all 94 endpoints in the [Aircall API reference](https://developers.aircall.io/api-references), verified against the published documentation.
+
 ## Features
 
 - Full type hints with Pydantic models
-- Comprehensive API coverage for Aircall endpoints
-- Simple and intuitive interface
-- Built-in authentication handling
+- Complete coverage of the documented Aircall REST API
+- Basic Auth and OAuth 2.0 Bearer authentication
+- Paginated results that expose Aircall's `meta` (total, current page, next page)
 - Custom exceptions for proper error handling
-- Automatic request/response serialization
+- `DeprecationWarning` on endpoints Aircall is retiring, naming the replacement and date
 - Comprehensive logging support for debugging and monitoring
 - Python 3.13+ support
 
@@ -30,14 +32,10 @@ uv add aircall-api
 ```python
 from aircall import AircallClient
 
-# Initialize the client
-client = AircallClient(
-    api_id="your_api_id",
-    api_token="your_api_token"
-)
+client = AircallClient(api_id="your_api_id", api_token="your_api_token")
 
 # List phone numbers
-numbers = client.number.list()
+numbers = client.number.list_numbers()
 
 # Get a specific number
 number = client.number.get(12345)
@@ -45,87 +43,192 @@ number = client.number.get(12345)
 
 ## Authentication
 
-To use this library, you'll need your Aircall API credentials:
+Aircall supports two schemes. Use whichever matches your integration.
+
+**Basic Auth** — for Aircall customers using their own account's API key:
 
 1. Log in to your [Aircall Dashboard](https://dashboard.aircall.io)
 2. Navigate to Settings > Integrations > API Keys
 3. Create a new API key or use an existing one
-4. Use the API ID and API Token to initialize the client
 
 ```python
 client = AircallClient(
     api_id="YOUR_API_ID",
     api_token="YOUR_API_TOKEN",
-    timeout=30,  # Optional: request timeout in seconds
-    verbose=False  # Optional: enable debug logging
+    timeout=30,      # Optional: request timeout in seconds
+    verbose=False    # Optional: enable debug logging
 )
 ```
 
+**OAuth 2.0** — for technology partners acting on a customer's behalf:
+
+```python
+client = AircallClient(access_token="YOUR_OAUTH_ACCESS_TOKEN")
+
+client.ping()  # {"ping": "pong"} -- verifies the token is accepted
+```
+
+Supplying neither scheme, or both, raises `ValueError`.
+
+## Pagination
+
+Every `list_*` method returns a `Page`. It behaves like a list, and additionally
+carries the pagination metadata Aircall sends:
+
+```python
+page = client.call.list_calls(per_page=50)
+
+for call in page:          # iterate like a list
+    print(call.id)
+
+page.meta.total            # total matching calls across all pages
+page.meta.current_page
+page.has_next              # whether another page exists
+```
+
+Walking every page:
+
+```python
+page_number = 1
+while True:
+    page = client.call.list_calls(page=page_number, per_page=50)
+    for call in page:
+        ...
+    if not page.has_next:
+        break
+    page_number += 1
+```
+
+`per_page` is validated locally against the bounds Aircall enforces (1-50 for most
+endpoints, 1-100 for SMS templates), so an out-of-range value raises `ValueError`
+rather than spending a request on a 400.
+
 ## Available Resources
 
-The library provides access to the following Aircall API resources:
-
-- **Calls** - List, search, retrieve call details, voicemails, and insights
-- **Contacts** - Manage contact information
-- **Numbers** - Manage phone numbers
-- **Users** - Manage team members
-- **Teams** - Manage teams
-- **Tags** - Organize calls and contacts with tags
-- **Messages** - SMS messaging
-- **Webhooks** - Configure webhook endpoints
-- **Integrations** - Manage third-party integrations
-- **Dialer Campaigns** - Manage dialer campaigns
-- **Companies** - Company information
-- **AI Voice Agents** - AI-powered voice agent management
-- **Conversation Intelligence** - Call analytics and insights
+| Attribute | Resource | Notes |
+|---|---|---|
+| `client.call` | Calls | List, search, transfer, tag, recordings, Conversation Intelligence |
+| `client.contact` | Contacts | Including phone numbers and emails |
+| `client.number` | Numbers | Including registration status |
+| `client.user` | Users (V1) | Deprecated by Aircall on 2026-09-30 |
+| `client.userv2` | Users (V2) | The replacement; routed to `/v2` |
+| `client.team` | Teams | |
+| `client.tag` | Tags | |
+| `client.message` | Messages | SMS, MMS, group, WhatsApp, templates |
+| `client.webhook` | Webhooks | |
+| `client.integration` | Integrations | |
+| `client.dialer_campaign` | Dialer campaigns | |
+| `client.company` | Company | |
+| `client.ai_voice_agent` | AI Voice Agents | Trigger outbound agent calls |
+| `client.analytics` | Analytics | Report exports; requires Analytics+ |
 
 ### Usage Examples
 
 #### Working with Calls
 
 ```python
-# List all calls
-calls = client.call.list(page=1, per_page=20)
+# List calls, newest first, with contact details included
+page = client.call.list_calls(page=1, per_page=20, order="desc", fetch_contact=True)
 
-# Get a specific call
-call = client.call.get(call_id=12345)
+# Get a specific call, including any AI Voice Agent segments
+call = client.call.get(12345, fetch_aiva_conv=True)
 
-# Search for calls
-calls = client.call.search(from_date="2024-01-01", to_date="2024-01-31")
+# Search within a time range
+page = client.call.search(**{"from": 1704067200, "to": 1706745600})
+
+# Conversation Intelligence
+client.call.get_transcription(12345, mode="realtime")
+client.call.get_summary(12345)
+client.call.get_predicted_csat(12345)
+client.call.get_custom_summary_result(12345)
 ```
 
 #### Working with Contacts
 
 ```python
-# List all contacts
-contacts = client.contact.list()
+page = client.contact.list_contacts()
 
-# Create a new contact
 contact = client.contact.create(
     first_name="John",
     last_name="Doe",
     phone_numbers=[{"label": "Work", "value": "+1234567890"}],
-    emails=[{"label": "Office", "value": "john.doe@example.com"}]
+    emails=[{"label": "Office", "value": "john.doe@example.com"}],
 )
 
-# Update a contact
-client.contact.update(
-    contact_id=12345,
-    emails=[{"label": "Personal", "value": "john@example.com"}]
-)
+client.contact.update(12345, emails=[{"label": "Personal", "value": "john@example.com"}])
 
-# Search for contacts
-contacts = client.contact.search(phone_number="+1234567890")
+page = client.contact.search(phone_number="+1234567890")
 ```
 
-#### Working with Numbers
+#### Working with Users
 
 ```python
-# List all numbers
-numbers = client.number.list()
+# User V2 -- the current API
+page = client.userv2.list_users()
+user = client.userv2.get(456)
+numbers = client.userv2.get_numbers(456)
+```
 
-# Get a specific number
-number = client.number.get(number_id=12345)
+#### Sending messages
+
+Aircall splits sending into two channels, and the distinction matters:
+
+```python
+# Stored in the agent's Aircall inbox, visible to agents
+client.message.send_in_conversation(number_id, to="+1234567890", body="Hello")
+
+# Bypasses the inbox entirely, for automated or high-volume traffic.
+# Register the number first with create_configuration().
+client.message.send_skipping_inbox(number_id, to="+1234567890", body="Your code is 1234")
+
+# Group and WhatsApp
+client.message.send_group_in_conversation(number_id, ["+1555...", "+1556..."], "Hi all")
+client.message.send_whatsapp_skipping_inbox(number_id, "+1234567890", text="Hello")
+
+# Templates and channel health
+client.message.list_sms_templates(search="order")
+client.message.list_whatsapp_templates(number_id, status="APPROVED")
+client.message.get_whatsapp_status(number_id)
+```
+
+#### AI Voice Agents and Analytics
+
+```python
+import time
+
+request = client.ai_voice_agent.trigger_outbound_call(
+    "agent-abc123",
+    contact_phone="+15551234567",
+    idempotency_key="appt-reminder-2026-03-15-cust-12345",
+    context={"first_name": "Jane", "appointment_date": "March 20th at 2:00 PM"},
+)
+
+export = client.analytics.create_export(
+    "CALLS_HISTORY",
+    timezone="Europe/Paris",
+    absolute_range={"fromDate": "2026-05-01", "toDate": "2026-05-15"},
+    filters={"teamIDs": [4242]},
+)
+while client.analytics.get_export(export.exportID).is_pending:
+    time.sleep(60)
+```
+
+## Deprecations
+
+Aircall is retiring some endpoints. The SDK raises a `DeprecationWarning` naming
+the replacement and the removal date rather than letting you find out from a 404.
+
+| Deprecated | Replacement | Aircall removes |
+|---|---|---|
+| `client.user.list_users/get/create/update` | `client.userv2.*` | 2026-09-30 |
+| `client.call.get_realtime_transcription()` | `client.call.get_transcription(id, mode="realtime")` | 2026-03-31 (passed) |
+| `client.message.send()` | `client.message.send_skipping_inbox()` | — |
+| `client.message.send_native()` | `client.message.send_in_conversation()` | — |
+
+Surface them with:
+
+```bash
+python -W default::DeprecationWarning your_script.py
 ```
 
 ## Error Handling
@@ -198,7 +301,7 @@ client = AircallClient(
 )
 
 # Now all API requests/responses will be logged
-numbers = client.number.list()
+numbers = client.number.list_numbers()
 ```
 
 ### Configuring Logging Levels
@@ -346,12 +449,16 @@ source .venv/bin/activate  # Linux/Mac
 ### Testing
 
 ```bash
-# Run tests
-pytest
+# Run the test suite
+uv run pytest
 
 # Run tests with coverage
-pytest --cov=aircall
+uv run pytest --cov=aircall
 ```
+
+Tests run entirely offline: a recording stand-in replaces the HTTP session, and the
+response fixtures in `tests/payloads.py` are transcribed from Aircall's own published
+examples, so the models are tested against what Aircall documents returning.
 
 ### Linting
 
@@ -372,6 +479,8 @@ aircall-api/
 │       ├── __init__.py
 │       ├── client.py          # Main API client
 │       ├── exceptions.py      # Custom exceptions
+│       ├── pagination.py      # Page and PageMeta
+│       ├── deprecation.py     # Deprecation warnings
 │       ├── models/            # Pydantic models
 │       │   ├── call.py
 │       │   ├── contact.py
@@ -409,7 +518,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Resources
 
-- [Aircall API Documentation](https://developer.aircall.io/)
+- [Aircall API Documentation](https://developers.aircall.io/api-references)
+- [Migration guide: 1.x to 2.0](MIGRATION.md)
 - [Aircall Dashboard](https://dashboard.aircall.io)
 
 ## Support

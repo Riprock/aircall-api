@@ -336,7 +336,9 @@ class CallResource(BaseResource):
         """
         return self._get(f"/calls/{call_id}/action_items")
 
-    def get_playbook_result(self, call_id: int) -> dict:
+    def get_playbook_result(
+        self, call_id: int, fetch_playbook: Optional[bool] = None
+    ) -> dict:
         """
         Get playbook results for a call.
 
@@ -346,7 +348,8 @@ class CallResource(BaseResource):
         Returns:
             dict: Playbook result data
         """
-        return self._get(f"/calls/{call_id}/playbook_result")
+        params = {"fetch_playbook": fetch_playbook} if fetch_playbook is not None else None
+        return self._get(f"/calls/{call_id}/playbook_result", params=params)
 
     def get_evaluation(self, call_id: int) -> dict:
         """
