@@ -1,6 +1,6 @@
 """Analytics models for Aircall API."""
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -39,16 +39,16 @@ class AnalyticsExport(BaseModel):
     """
 
     exportID: str
-    createdAt: Optional[datetime] = None
-    status: Optional[Literal["PENDING", "COMPLETED", "FAILED"]] = None
-    format: Optional[str] = None
-    exportName: Optional[str] = None
-    isZipCompressed: Optional[bool] = None
+    createdAt: datetime | None = None
+    status: Literal["PENDING", "COMPLETED", "FAILED"] | None = None
+    format: str | None = None
+    exportName: str | None = None
+    isZipCompressed: bool | None = None
     # Present only once status is COMPLETED; presigned and time-limited.
-    downloadUrl: Optional[str] = None
-    downloadUrlExpiresAt: Optional[datetime] = None
+    downloadUrl: str | None = None
+    downloadUrlExpiresAt: datetime | None = None
     # Present only when status is FAILED.
-    errorMessage: Optional[str] = None
+    errorMessage: str | None = None
 
     @property
     def is_complete(self) -> bool:

@@ -6,7 +6,6 @@ parses the standalone response and rejects the nested one.
 """
 
 from aircall.models import Call, Message, User
-
 from tests import payloads
 
 

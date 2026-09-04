@@ -13,8 +13,8 @@ from aircall.resources.number import NumberResource
 from aircall.resources.tag import TagResource
 from aircall.resources.team import TeamResource
 from aircall.resources.user import UserResource
-from aircall.resources.webhook import WebhookResource
 from aircall.resources.userv2 import UserV2Resource
+from aircall.resources.webhook import WebhookResource
 
 __all__ = [
     "AIVoiceAgentResource",
@@ -30,6 +30,6 @@ __all__ = [
     "TagResource",
     "TeamResource",
     "UserResource",
-    "WebhookResource",
-    "UserV2Resource"
+    "UserV2Resource",
+    "WebhookResource"
 ]

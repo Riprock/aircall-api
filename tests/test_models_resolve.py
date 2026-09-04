@@ -80,7 +80,6 @@ def test_user_validates_without_number_in_calling_scope():
     that failed.
     """
     from aircall.models import User  # deliberately without Number
-
     from tests.payloads import USER_FULL
 
     assert User(**USER_FULL).id == 456

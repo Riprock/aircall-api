@@ -10,7 +10,6 @@ import pytest
 
 from aircall import Page, PageMeta
 from aircall.pagination import MAX_PER_PAGE, validate_per_page
-
 from tests import payloads
 
 

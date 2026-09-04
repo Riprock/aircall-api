@@ -9,10 +9,13 @@ Analytics endpoints use camelCase.
 import pytest
 
 from aircall.models import (
-    AnalyticsExport, GroupMessage, Message, OutboundCallRequest,
-    SmsTemplate, WhatsAppLineStatus,
+    AnalyticsExport,
+    GroupMessage,
+    Message,
+    OutboundCallRequest,
+    SmsTemplate,
+    WhatsAppLineStatus,
 )
-
 from tests import payloads
 
 BASE = "https://api.aircall.io/v1"

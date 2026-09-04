@@ -1,6 +1,5 @@
 """IVR Option model for Aircall API."""
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -16,7 +15,7 @@ class IVROption(BaseModel):
     id: str
     title: str
     key: str
-    branch: Optional[str] = None
+    branch: str | None = None
     created_at: datetime
     transition_started_at: datetime
     transition_ended_at: datetime

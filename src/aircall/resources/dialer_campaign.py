@@ -1,7 +1,7 @@
 """Resource module for managing dialer campaigns"""
+from aircall.models import DialerCampaign, DialerCampaignPhoneNumber
 from aircall.pagination import Page
 from aircall.resources.base import BaseResource
-from aircall.models import DialerCampaign, DialerCampaignPhoneNumber
 
 
 class DialerCampaignResource(BaseResource):

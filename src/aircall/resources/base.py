@@ -1,7 +1,6 @@
 """Base resource class for all Aircall API resources."""
 
 import logging
-from typing import Optional
 
 from aircall.pagination import (
     DEFAULT_PER_PAGE,
@@ -45,8 +44,8 @@ class BaseResource:
         *,
         page: int = 1,
         per_page: int = DEFAULT_PER_PAGE,
-        params: Optional[dict] = None,
-        version: Optional[str] = None,
+        params: dict | None = None,
+        version: str | None = None,
         max_per_page: int = MAX_PER_PAGE,
     ) -> Page:
         """
@@ -92,7 +91,7 @@ class BaseResource:
         meta = response.get("meta")
         return Page(parsed, PageMeta(**meta) if meta else None)
 
-    def _get(self, endpoint: str, params: dict = None, version: Optional[str] = None, **kwargs) -> dict:
+    def _get(self, endpoint: str, params: dict | None = None, version: str | None = None, **kwargs) -> dict:
         """
         Make a GET request.
 
@@ -109,7 +108,7 @@ class BaseResource:
             "GET", endpoint, params=params, version=version or self._api_version, **kwargs
         )
 
-    def _post(self, endpoint: str, json: dict = None, version: Optional[str] = None, **kwargs) -> dict:
+    def _post(self, endpoint: str, json: dict | None = None, version: str | None = None, **kwargs) -> dict:
         """
         Make a POST request.
 
@@ -126,7 +125,7 @@ class BaseResource:
             "POST", endpoint, json=json, version=version or self._api_version, **kwargs
         )
 
-    def _put(self, endpoint: str, json: dict = None, version: Optional[str] = None, **kwargs) -> dict:
+    def _put(self, endpoint: str, json: dict | None = None, version: str | None = None, **kwargs) -> dict:
         """
         Make a PUT request.
 
@@ -143,7 +142,7 @@ class BaseResource:
             "PUT", endpoint, json=json, version=version or self._api_version, **kwargs
         )
 
-    def _delete(self, endpoint: str, version: Optional[str] = None, **kwargs) -> dict:
+    def _delete(self, endpoint: str, version: str | None = None, **kwargs) -> dict:
         """
         Make a DELETE request.
 

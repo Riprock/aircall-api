@@ -5,7 +5,6 @@ to actually reach /v2 and return the V2 model.
 """
 
 from aircall.models import Number, UserV2
-
 from tests import payloads
 
 

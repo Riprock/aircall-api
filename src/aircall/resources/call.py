@@ -1,13 +1,12 @@
 """Resource module for managing calls"""
-from typing import Optional
 
 from aircall.deprecation import (
     REALTIME_TRANSCRIPTION_SUNSET,
     warn_deprecated,
 )
+from aircall.models import Call
 from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
-from aircall.models import Call
 
 #: Values Aircall accepts for the transcription "mode" query param.
 TRANSCRIPTION_MODES = frozenset({"async", "realtime"})
@@ -80,7 +79,7 @@ class CallResource(BaseResource):
             "/calls/search", "calls", Call, page=page, per_page=per_page, params=params
         )
 
-    def transfer(self, call_id: int, number_id: int, comment: str = None) -> dict:
+    def transfer(self, call_id: int, number_id: int, comment: str | None = None) -> dict:
         """
         Transfer a call to another number.
 
@@ -217,7 +216,7 @@ class CallResource(BaseResource):
         """
         return self._post(f"/calls/{call_id}/insight_cards", json={"cards": cards})
 
-    def get_transcription(self, call_id: int, mode: Optional[str] = None) -> dict:
+    def get_transcription(self, call_id: int, mode: str | None = None) -> dict:
         """
         Get the transcription of a call.
 
@@ -337,7 +336,7 @@ class CallResource(BaseResource):
         return self._get(f"/calls/{call_id}/action_items")
 
     def get_playbook_result(
-        self, call_id: int, fetch_playbook: Optional[bool] = None
+        self, call_id: int, fetch_playbook: bool | None = None
     ) -> dict:
         """
         Get playbook results for a call.

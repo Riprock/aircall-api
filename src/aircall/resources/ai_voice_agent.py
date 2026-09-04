@@ -1,5 +1,4 @@
 """Resource module for triggering AI Voice Agent outbound calls"""
-from typing import Optional
 
 from aircall.models import OutboundCallRequest
 from aircall.resources.base import BaseResource
@@ -25,8 +24,8 @@ class AIVoiceAgentResource(BaseResource):
         agent_id: str,
         contact_phone: str,
         idempotency_key: str,
-        context: Optional[dict] = None,
-        expiration_seconds: Optional[int] = None,
+        context: dict | None = None,
+        expiration_seconds: int | None = None,
     ) -> OutboundCallRequest:
         """
         Queue an outbound call from an AI Voice Agent.

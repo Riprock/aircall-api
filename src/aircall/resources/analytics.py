@@ -1,5 +1,4 @@
 """Resource module for Analytics report exports"""
-from typing import Optional
 
 from aircall.models import AnalyticsExport
 from aircall.models.analytics import RELATIVE_DATE_RANGES, REPORT_NAMES
@@ -20,11 +19,11 @@ class AnalyticsResource(BaseResource):
         self,
         report_name: str,
         timezone: str,
-        relative_range: Optional[str] = None,
-        absolute_range: Optional[dict] = None,
-        filters: Optional[dict] = None,
-        options: Optional[dict] = None,
-        export_options: Optional[dict] = None,
+        relative_range: str | None = None,
+        absolute_range: dict | None = None,
+        filters: dict | None = None,
+        options: dict | None = None,
+        export_options: dict | None = None,
     ) -> AnalyticsExport:
         """
         Submit an asynchronous report export job.

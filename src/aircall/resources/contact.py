@@ -1,7 +1,7 @@
 """Resource module for managing contacts"""
+from aircall.models import Contact
 from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
-from aircall.models import Contact
 
 
 class ContactResource(BaseResource):
@@ -53,10 +53,10 @@ class ContactResource(BaseResource):
 
     def create(
         self,
-        first_name: str = None,
-        last_name: str = None,
-        phone_numbers: list[dict] = None,
-        emails: list[dict] = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        phone_numbers: list[dict] | None = None,
+        emails: list[dict] | None = None,
         **kwargs
     ) -> Contact:
         """
@@ -130,7 +130,7 @@ class ContactResource(BaseResource):
         """
         return self._delete(f"/contacts/{contact_id}")
 
-    def add_phone_number(self, contact_id: int, value: str, label: str = None) -> dict:
+    def add_phone_number(self, contact_id: int, value: str, label: str | None = None) -> dict:
         """
         Add a phone number to a contact.
 
@@ -148,7 +148,7 @@ class ContactResource(BaseResource):
         return self._post(f"/contacts/{contact_id}/phone_details", json=data)
 
     def update_phone_number(self, contact_id: int, phone_number_id: int,
-                          value: str = None, label: str = None) -> dict:
+                          value: str | None = None, label: str | None = None) -> dict:
         """
         Update a phone number from a contact.
 
@@ -181,7 +181,7 @@ class ContactResource(BaseResource):
         """
         return self._delete(f"/contacts/{contact_id}/phone_details/{phone_number_id}")
 
-    def add_email(self, contact_id: int, value: str, label: str = None) -> dict:
+    def add_email(self, contact_id: int, value: str, label: str | None = None) -> dict:
         """
         Add an email to a contact.
 
@@ -199,7 +199,7 @@ class ContactResource(BaseResource):
         return self._post(f"/contacts/{contact_id}/email_details", json=data)
 
     def update_email(self, contact_id: int, email_id: int,
-                    value: str = None, label: str = None) -> dict:
+                    value: str | None = None, label: str | None = None) -> dict:
         """
         Update an email from a contact.
 

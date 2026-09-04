@@ -1,7 +1,7 @@
 """Resource module for managing webhooks"""
+from aircall.models import Webhook
 from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
-from aircall.models import Webhook
 
 
 class WebhookResource(BaseResource):

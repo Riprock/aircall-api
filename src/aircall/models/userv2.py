@@ -1,9 +1,8 @@
 """User V2 models for Aircall API."""
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel
-
 
 # Availability status values for granular user status
 AvailabilityStatusType = Literal[
@@ -64,7 +63,7 @@ class UserV2(BaseModel):
     or 'unavailable' (Do Not Disturb or other unavailable status).
     """
 
-    substatus: Optional[str] = None
+    substatus: str | None = None
     """
     Current substatus of the User. Absent from the Create a User V2 response.
     - If availability_status is 'available' or 'custom': substatus will be 'always_open'.
@@ -98,17 +97,17 @@ class UserV2Availability(BaseModel):
 
     These statuses provide more detail about why a user may or may not be available.
     """
-    available: Optional[str] = None
+    available: str | None = None
     """Agent ready to answer calls."""
 
-    offline: Optional[str] = None
+    offline: str | None = None
     """Agent not online."""
 
-    do_not_disturb: Optional[str] = None
+    do_not_disturb: str | None = None
     """Agent toggled themselves as do not disturb."""
 
-    in_call: Optional[str] = None
+    in_call: str | None = None
     """Agent is currently on a call."""
 
-    after_call_work: Optional[str] = None
+    after_call_work: str | None = None
     """Agent is performing their after-call work (tagging a call or wrapping up)."""

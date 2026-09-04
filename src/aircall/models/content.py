@@ -1,5 +1,5 @@
 """Content models for Aircall API."""
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -10,8 +10,8 @@ class Utterance(BaseModel):
     end_time: float
     text: str
     participant_type: Literal["external", "internal"]
-    user_id: Optional[int] = None
-    phone_number: Optional[str] = None
+    user_id: int | None = None
+    phone_number: str | None = None
 
 
 class Content(BaseModel):

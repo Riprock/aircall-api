@@ -2,13 +2,12 @@
 
 import logging
 import sys
-from typing import Optional
 
 
 def setup_logger(
     name: str,
-    level: Optional[int] = None,
-    handler: Optional[logging.Handler] = None
+    level: int | None = None,
+    handler: logging.Handler | None = None
 ) -> logging.Logger:
     """
     Set up a logger with consistent formatting.
@@ -44,7 +43,7 @@ def setup_logger(
     return logger
 
 
-def configure_logging(level: Optional[int] = None) -> None:
+def configure_logging(level: int | None = None) -> None:
     """
     Configure logging for the entire Aircall SDK.
 

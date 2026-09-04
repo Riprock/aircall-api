@@ -14,9 +14,10 @@ from aircall.exceptions import (
     UnprocessableEntityError,
     ValidationError,
 )
+from aircall.logging_config import configure_logging
 from aircall.models import (
-    AIVoiceAgent,
     ActionItemsContent,
+    AIVoiceAgent,
     AnalyticsExport,
     Call,
     CallAIVoiceAgent,
@@ -30,8 +31,8 @@ from aircall.models import (
     DialerCampaignPhoneNumber,
     Email,
     GroupMessage,
-    IVROption,
     Integration,
+    IVROption,
     MediaDetail,
     Message,
     Number,
@@ -55,30 +56,19 @@ from aircall.models import (
     Webhook,
     WhatsAppLineStatus,
 )
-from aircall.logging_config import configure_logging
 from aircall.pagination import Page, PageMeta
 
 __all__ = [
-    # Client
-    "AircallClient",
-    # Base exceptions
-    "AircallError",
-    "AircallAPIError",
-    # API exceptions
-    "AuthenticationError",
-    "AircallPermissionError",
-    "NotFoundError",
-    "ValidationError",
-    "UnprocessableEntityError",
-    "RateLimitError",
-    "ServerError",
-    # Connection exceptions
-    "AircallConnectionError",
-    "AircallTimeoutError",
-    # Models
     "AIVoiceAgent",
     "ActionItemsContent",
+    "AircallAPIError",
+    "AircallClient",
+    "AircallConnectionError",
+    "AircallError",
+    "AircallPermissionError",
+    "AircallTimeoutError",
     "AnalyticsExport",
+    "AuthenticationError",
     "Call",
     "CallAIVoiceAgent",
     "CallComment",
@@ -95,29 +85,32 @@ __all__ = [
     "Integration",
     "MediaDetail",
     "Message",
+    "NotFoundError",
     "Number",
     "NumberMessages",
     "OutboundCallRequest",
+    "Page",
+    "PageMeta",
     "Participant",
     "PhoneNumber",
+    "RateLimitError",
     "RealtimeTranscription",
     "RealtimeTranscriptionCall",
     "RealtimeTranscriptionUtterance",
+    "ServerError",
     "SmsTemplate",
     "SummaryContent",
     "Tag",
     "Team",
     "TopicsContent",
+    "UnprocessableEntityError",
     "User",
     "UserAvailability",
     "UserV2",
     "UserV2Availability",
     "Utterance",
+    "ValidationError",
     "Webhook",
     "WhatsAppLineStatus",
-    # Pagination
-    "Page",
-    "PageMeta",
-    # Logging
     "configure_logging",
 ]

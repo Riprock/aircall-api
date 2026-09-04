@@ -1,7 +1,7 @@
 """Resource module for managing teams"""
+from aircall.models import Team
 from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
-from aircall.models import Team
 
 
 class TeamResource(BaseResource):

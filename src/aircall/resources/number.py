@@ -1,8 +1,8 @@
 """Number resource for managing Aircall phone numbers."""
 
+from aircall.models import Number
 from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
-from aircall.models import Number
 
 
 class NumberResource(BaseResource):

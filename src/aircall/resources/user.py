@@ -1,8 +1,8 @@
 """Resource module for managing users"""
 from aircall.deprecation import USER_V1_SUNSET, warn_deprecated
+from aircall.models import User, UserAvailability
 from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
-from aircall.models import User, UserAvailability
 
 
 class UserResource(BaseResource):

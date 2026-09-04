@@ -1,6 +1,5 @@
 """Resource module for managing messages"""
 import warnings
-from typing import Optional
 
 from aircall.models import (
     GroupMessage,
@@ -72,7 +71,7 @@ class MessageResource(BaseResource):
         number_id: int,
         to: str,
         body: str,
-        media_url: Optional[list[str]] = None,
+        media_url: list[str] | None = None,
         **kwargs
     ) -> Message:
         """
@@ -100,7 +99,7 @@ class MessageResource(BaseResource):
         number_id: int,
         to: str,
         body: str,
-        media_url: Optional[list[str]] = None,
+        media_url: list[str] | None = None,
         **kwargs
     ) -> Message:
         """
@@ -129,7 +128,7 @@ class MessageResource(BaseResource):
         endpoint: str,
         to: str,
         body: str,
-        media_url: Optional[list[str]],
+        media_url: list[str] | None,
         extra: dict
     ) -> Message:
         """
@@ -188,8 +187,8 @@ class MessageResource(BaseResource):
         self,
         number_id: int,
         participants: list[str],
-        body: Optional[str] = None,
-        media_url: Optional[list[str]] = None,
+        body: str | None = None,
+        media_url: list[str] | None = None,
         **kwargs
     ) -> GroupMessage:
         """
@@ -233,8 +232,8 @@ class MessageResource(BaseResource):
         self,
         number_id: int,
         to: str,
-        text: Optional[str] = None,
-        template_params: Optional[dict] = None,
+        text: str | None = None,
+        template_params: dict | None = None,
         **kwargs
     ) -> Message:
         """
@@ -262,8 +261,8 @@ class MessageResource(BaseResource):
         self,
         number_id: int,
         to: str,
-        text: Optional[str] = None,
-        template_params: Optional[dict] = None,
+        text: str | None = None,
+        template_params: dict | None = None,
         **kwargs
     ) -> Message:
         """
@@ -292,8 +291,8 @@ class MessageResource(BaseResource):
         number_id: int,
         recipient_field: str,
         to: str,
-        text: Optional[str],
-        template_params: Optional[dict],
+        text: str | None,
+        template_params: dict | None,
         extra: dict,
     ) -> dict:
         """
@@ -333,7 +332,7 @@ class MessageResource(BaseResource):
         self,
         page: int = 1,
         per_page: int = DEFAULT_PER_PAGE,
-        search: Optional[str] = None,
+        search: str | None = None,
     ) -> Page:
         """
         List the company's SMS templates, aggregated across all agents.

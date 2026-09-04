@@ -1,6 +1,6 @@
 """User models for Aircall API."""
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel
 
@@ -25,7 +25,7 @@ class User(BaseModel):
     available: bool  # Based on working hours
     availability_status: Literal["available", "custom", "unavailable"]
     # Omitted from user objects nested inside Call payloads
-    substatus: Optional[str] = None  # always_open, always_closed, or specific reason
+    substatus: str | None = None  # always_open, always_closed, or specific reason
 
     # Related resources
     numbers: list["Number"] = []
@@ -33,9 +33,9 @@ class User(BaseModel):
     # Settings
     # All three are omitted from abridged user objects nested in other payloads
     # (Call.user, Call.comments[].posted_by), so they cannot be required.
-    time_zone: Optional[str] = None  # Default: Etc/UTC
-    language: Optional[str] = None  # IETF language tag, default: en-US
-    wrap_up_time: Optional[int] = None  # Timer after call ends (seconds)
+    time_zone: str | None = None  # Default: Etc/UTC
+    language: str | None = None  # IETF language tag, default: en-US
+    wrap_up_time: int | None = None  # Timer after call ends (seconds)
 
 
 class UserAvailability(BaseModel):
@@ -50,5 +50,5 @@ class UserAvailability(BaseModel):
     after_call_work. Left as a plain str rather than a Literal so a value Aircall
     adds later does not break parsing.
     """
-    id: Optional[int] = None  # Absent on the single-user endpoint
+    id: int | None = None  # Absent on the single-user endpoint
     availability: str

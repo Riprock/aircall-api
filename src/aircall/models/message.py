@@ -26,7 +26,7 @@ class Message(BaseModel):
     direct_link: str
     direction: Literal["inbound", "outbound"]
     # Present on webhook payloads (message.received) but not on send responses
-    external_number: Optional[str] = None
+    external_number: str | None = None
     body: str
     status: str
     raw_digits: str
@@ -36,19 +36,19 @@ class Message(BaseModel):
     media_url: list[str] = []
     created_at: datetime
     updated_at: datetime
-    sent_at: Optional[datetime] = None
+    sent_at: datetime | None = None
 
     # Channel-specific fields
-    channel: Optional[Literal["whatsapp"]] = None  # null for SMS/MMS
+    channel: Literal["whatsapp"] | None = None  # null for SMS/MMS
 
     # WhatsApp-specific fields
-    template_content: Optional[str] = None
-    type: Optional[str] = None
-    metadata: Optional[str] = None
-    parent_id: Optional[str] = None
-    whatsapp_message_category: Optional[Literal["marketing", "utility", "authentication"]] = None
-    whatsapp_message_type: Optional[Literal["regular", "free_entry_point", "free_customer_serivce"]] = None
-    recipient_country: Optional[str] = None
+    template_content: str | None = None
+    type: str | None = None
+    metadata: str | None = None
+    parent_id: str | None = None
+    whatsapp_message_category: Literal["marketing", "utility", "authentication"] | None = None
+    whatsapp_message_type: Literal["regular", "free_entry_point", "free_customer_serivce"] | None = None
+    recipient_country: str | None = None
 
     # Related objects
     number: Optional["Number"] = None
@@ -67,16 +67,16 @@ class GroupMessage(BaseModel):
     """
 
     group_message_id: str
-    group_conversation_id: Optional[str] = None
-    direct_link: Optional[str] = None
-    direction: Optional[Literal["inbound", "outbound"]] = None
-    status: Optional[str] = None
+    group_conversation_id: str | None = None
+    direct_link: str | None = None
+    direction: Literal["inbound", "outbound"] | None = None
+    status: str | None = None
     participants: list[str] = []
-    body: Optional[str] = None
+    body: str | None = None
     media_url: list[str] = []
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    sent_at: Optional[datetime] = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    sent_at: datetime | None = None
     number: Optional["Number"] = None
 
 
@@ -84,8 +84,8 @@ class SmsTemplate(BaseModel):
     """An SMS template belonging to the company, aggregated across agents."""
 
     id: int
-    name: Optional[str] = None
-    body: Optional[str] = None
+    name: str | None = None
+    body: str | None = None
 
 
 class WhatsAppLineStatus(BaseModel):
@@ -96,9 +96,9 @@ class WhatsAppLineStatus(BaseModel):
     endpoint, unlike the snake_case used elsewhere in the API.
     """
 
-    wabaId: Optional[str] = None
-    status: Optional[str] = None
-    canSendMessage: Optional[bool] = None
-    messagingLimitTier: Optional[str] = None
-    qualityRating: Optional[str] = None
-    businessVerificationStatus: Optional[str] = None
+    wabaId: str | None = None
+    status: str | None = None
+    canSendMessage: bool | None = None
+    messagingLimitTier: str | None = None
+    qualityRating: str | None = None
+    businessVerificationStatus: str | None = None

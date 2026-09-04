@@ -9,10 +9,19 @@ here rather than in a user's integration.
 import pytest
 
 from aircall.models import (
-    Call, Company, Contact, DialerCampaign, Integration, Message, Number,
-    Tag, Team, User, UserV2, Webhook,
+    Call,
+    Company,
+    Contact,
+    DialerCampaign,
+    Integration,
+    Message,
+    Number,
+    Tag,
+    Team,
+    User,
+    UserV2,
+    Webhook,
 )
-
 from tests import payloads
 
 # (id, response payload, call, expected result type)

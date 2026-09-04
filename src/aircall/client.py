@@ -3,10 +3,10 @@
 import base64
 import logging
 import time
-from typing import Optional
 
 import requests
-from requests.exceptions import Timeout, ConnectionError as RequestsConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import Timeout
 
 from aircall.exceptions import (
     AircallAPIError,
@@ -34,7 +34,7 @@ from aircall.resources import (
     TeamResource,
     UserResource,
     UserV2Resource,
-    WebhookResource
+    WebhookResource,
 )
 
 
@@ -52,11 +52,11 @@ class AircallClient:
 
     def __init__(
         self,
-        api_id: Optional[str] = None,
-        api_token: Optional[str] = None,
+        api_id: str | None = None,
+        api_token: str | None = None,
         timeout: int = 30,
         verbose: bool = False,
-        access_token: Optional[str] = None
+        access_token: str | None = None
     ) -> None:
         """
         Initialize the Aircall API client.
@@ -126,7 +126,7 @@ class AircallClient:
 
     @staticmethod
     def _build_authorization(
-        api_id: Optional[str], api_token: Optional[str], access_token: Optional[str]
+        api_id: str | None, api_token: str | None, access_token: str | None
     ) -> str:
         """
         Build the Authorization header value for the credentials supplied.
@@ -194,9 +194,9 @@ class AircallClient:
         self,
         method: str,
         endpoint: str,
-        params: dict = None,
-        json: dict = None,
-        timeout: int = None,
+        params: dict | None = None,
+        json: dict | None = None,
+        timeout: int | None = None,
         version: str = "v1"
     ) -> dict:
         """
@@ -261,7 +261,7 @@ class AircallClient:
                 method, url, str(e), elapsed
             )
             raise AircallConnectionError(
-                f"Failed to connect to {url}: {str(e)}"
+                f"Failed to connect to {url}: {e!s}"
             ) from e
 
         elapsed = time.time() - start_time
@@ -287,8 +287,9 @@ class AircallClient:
             if isinstance(error_data, dict):
                 # Try to get message from various possible fields
                 error_message = error_data.get('message') or error_data.get('error') or error_message
-        except Exception:
-            # If response is not JSON, use text content
+        except ValueError:
+            # Body was not JSON. requests raises JSONDecodeError, which
+            # subclasses ValueError; fall back to the raw text.
             if response.text:
                 error_message = response.text
 

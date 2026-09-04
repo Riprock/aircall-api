@@ -1,7 +1,7 @@
 """Resource module for managing users via the v2 API"""
+from aircall.models import Number, UserV2
 from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
-from aircall.models import Number, UserV2
 
 
 class UserV2Resource(BaseResource):

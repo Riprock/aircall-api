@@ -1,7 +1,7 @@
 """Resource module for managing tags"""
+from aircall.models import Tag
 from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
-from aircall.models import Tag
 
 
 class TagResource(BaseResource):
@@ -38,7 +38,7 @@ class TagResource(BaseResource):
         response = self._get(f"/tags/{tag_id}")
         return Tag(**response["tag"])
 
-    def create(self, name: str, color: str, description: str = None) -> Tag:
+    def create(self, name: str, color: str, description: str | None = None) -> Tag:
         """
         Create a new tag.
 

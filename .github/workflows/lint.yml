@@ -33,7 +33,7 @@ jobs:
                         src/aircall/
 
       - name: Run ruff
-        run: uv run ruff check src/
+        run: uv run ruff check src/ tests/
 
 
 

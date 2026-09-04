@@ -10,7 +10,6 @@ indexes, takes ``len()`` or checks ``isinstance(result, list)`` keeps working
 unchanged; only the extra metadata is new.
 """
 
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -27,12 +26,12 @@ class PageMeta(BaseModel):
     meta object, and some omit it entirely.
     """
 
-    count: Optional[int] = None
-    total: Optional[int] = None
-    current_page: Optional[int] = None
-    per_page: Optional[int] = None
-    next_page_link: Optional[str] = None
-    previous_page_link: Optional[str] = None
+    count: int | None = None
+    total: int | None = None
+    current_page: int | None = None
+    per_page: int | None = None
+    next_page_link: str | None = None
+    previous_page_link: str | None = None
 
 
 class Page(list):
@@ -50,7 +49,7 @@ class Page(list):
 
     __slots__ = ("meta",)
 
-    def __init__(self, items=(), meta: Optional[PageMeta] = None):
+    def __init__(self, items=(), meta: PageMeta | None = None):
         """
         Args:
             items: The parsed objects on this page
@@ -70,7 +69,7 @@ class Page(list):
         return bool(self.meta and self.meta.previous_page_link)
 
     @property
-    def total(self) -> Optional[int]:
+    def total(self) -> int | None:
         """Total matching items across all pages, if the endpoint reported it."""
         return self.meta.total if self.meta else None
 

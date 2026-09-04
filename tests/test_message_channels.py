@@ -10,7 +10,6 @@ warn.
 import pytest
 
 from aircall.models import Message
-
 from tests import payloads
 
 IN_CONVERSATION = "https://api.aircall.io/v1/numbers/123/messages/native/send"

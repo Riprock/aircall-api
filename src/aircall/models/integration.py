@@ -9,7 +9,7 @@ from aircall.models.user import User
 class Integration(BaseModel):
     """Integration object representing connection state with third-party services"""
     name: str
-    custom_name: Optional[str] = None
+    custom_name: str | None = None
     logo: str
     company_id: int
     status: str

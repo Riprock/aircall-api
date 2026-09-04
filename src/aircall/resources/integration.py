@@ -1,6 +1,6 @@
 """Resource module for managing integrations"""
-from aircall.resources.base import BaseResource
 from aircall.models import Integration
+from aircall.resources.base import BaseResource
 
 
 class IntegrationResource(BaseResource):
