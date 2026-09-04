@@ -40,12 +40,15 @@ class User(BaseModel):
 
 class UserAvailability(BaseModel):
     """
-    Granular availability status for a user.
+    Granular availability status for a User.
 
-    Use the dedicated endpoint to retrieve these statuses.
+    Aircall reports this as a single string, not a set of booleans:
+    GET /v1/users/:id/availability returns {"availability": "after_call_work"},
+    and GET /v1/users/availabilities returns the same object per user with an id.
+
+    Documented values are available, offline, do_not_disturb, in_call and
+    after_call_work. Left as a plain str rather than a Literal so a value Aircall
+    adds later does not break parsing.
     """
-    available: Optional[bool] = None  # Ready to answer calls
-    offline: Optional[bool] = None  # Not online
-    do_not_disturb: Optional[bool] = None  # DND toggled
-    in_call: Optional[bool] = None  # Currently on a call
-    after_call_work: Optional[bool] = None  # Tagging/wrapping up
+    id: Optional[int] = None  # Absent on the single-user endpoint
+    availability: str

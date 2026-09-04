@@ -1,4 +1,5 @@
 """Resource module for managing teams"""
+from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
 from aircall.models import Team
 
@@ -11,19 +12,18 @@ class TeamResource(BaseResource):
     Team names must be unique within a company (max 64 characters).
     """
 
-    def list_teams(self, page: int = 1, per_page: int = 20) -> list[Team]:
+    def list_teams(self, page: int = 1, per_page: int = DEFAULT_PER_PAGE) -> Page:
         """
         List all teams with pagination.
 
         Args:
             page: Page number (default 1)
-            per_page: Results per page (default 20, max 50)
+            per_page: Results per page (1-50, default 20)
 
         Returns:
-            list[Team]: List of Team objects
+            Page: Team objects, carrying .meta pagination details
         """
-        response = self._get("/teams", params={"page": page, "per_page": per_page})
-        return [Team(**t) for t in response["teams"]]
+        return self._list("/teams", "teams", Team, page=page, per_page=per_page)
 
     def get(self, team_id: int) -> Team:
         """

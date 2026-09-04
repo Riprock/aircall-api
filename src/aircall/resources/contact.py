@@ -1,4 +1,5 @@
 """Resource module for managing contacts"""
+from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
 from aircall.models import Contact
 
@@ -10,21 +11,20 @@ class ContactResource(BaseResource):
     Handles operations relating to contacts including phone numbers and emails.
     """
 
-    def list_contacts(self, page: int = 1, per_page: int = 20) -> list[Contact]:
+    def list_contacts(self, page: int = 1, per_page: int = DEFAULT_PER_PAGE) -> Page:
         """
         List all contacts with pagination.
 
         Args:
             page: Page number (default 1)
-            per_page: Results per page (default 20, max 50)
+            per_page: Results per page (1-50, default 20)
 
         Returns:
-            list[Contact]: List of Contact objects
+            Page: Contact objects, carrying .meta pagination details
         """
-        response = self._get("/contacts", params={"page": page, "per_page": per_page})
-        return [Contact(**c) for c in response["contacts"]]
+        return self._list("/contacts", "contacts", Contact, page=page, per_page=per_page)
 
-    def search(self, **params) -> list[Contact]:
+    def search(self, page: int = 1, per_page: int = DEFAULT_PER_PAGE, **params) -> Page:
         """
         Search for contacts with various filters.
 
@@ -32,10 +32,11 @@ class ContactResource(BaseResource):
             **params: Search parameters (phone_number, email, etc.)
 
         Returns:
-            list[Contact]: List of Contact objects matching the search criteria
+            Page: matching Contact objects, carrying .meta pagination details
         """
-        response = self._get("/contacts/search", params=params)
-        return [Contact(**c) for c in response["contacts"]]
+        return self._list(
+            "/contacts/search", "contacts", Contact, page=page, per_page=per_page, params=params
+        )
 
     def get(self, contact_id: int) -> Contact:
         """

@@ -49,3 +49,28 @@ def test_number_tolerates_undeclared_fields():
     from aircall.models import Number
 
     assert Number(**payloads.NUMBER_V2).id == 1234
+
+
+def test_userv2_create_response_omits_substatus():
+    """POST /v2/users returns no substatus, so it cannot be required."""
+    from aircall.models import UserV2
+
+    user = UserV2(**payloads.USER_V2_CREATED)
+    assert user.substatus is None
+    assert user.wrap_up_time == 0
+
+
+def test_user_availability_is_a_string_not_booleans():
+    """GET /v1/users/:id/availability returns {"availability": "..."}.
+
+    The model previously declared five booleans, so it parsed that response into
+    an object with every field None -- silently wrong rather than failing.
+    """
+    from aircall.models import UserAvailability
+
+    single = UserAvailability(availability="after_call_work")
+    assert single.availability == "after_call_work"
+    assert single.id is None
+
+    listed = UserAvailability(**payloads.USER_AVAILABILITY)
+    assert (listed.id, listed.availability) == (456, "available")

@@ -1,4 +1,5 @@
 """Resource module for managing webhooks"""
+from aircall.pagination import DEFAULT_PER_PAGE, Page
 from aircall.resources.base import BaseResource
 from aircall.models import Webhook
 
@@ -11,19 +12,18 @@ class WebhookResource(BaseResource):
     Use the token field to authenticate incoming webhook requests.
     """
 
-    def list_webhooks(self, page: int = 1, per_page: int = 20) -> list[Webhook]:
+    def list_webhooks(self, page: int = 1, per_page: int = DEFAULT_PER_PAGE) -> Page:
         """
         List all webhooks with pagination.
 
         Args:
             page: Page number (default 1)
-            per_page: Results per page (default 20, max 50)
+            per_page: Results per page (1-50, default 20)
 
         Returns:
-            list[Webhook]: List of Webhook objects
+            Page: Webhook objects, carrying .meta pagination details
         """
-        response = self._get("/webhooks", params={"page": page, "per_page": per_page})
-        return [Webhook(**w) for w in response["webhooks"]]
+        return self._list("/webhooks", "webhooks", Webhook, page=page, per_page=per_page)
 
     def get(self, webhook_id: str) -> Webhook:
         """

@@ -31,6 +31,9 @@ class Message(BaseModel):
     status: str
     raw_digits: str
     media_details: list[MediaDetail] = []
+    # Send responses return plain URLs under media_url; inbound webhook payloads
+    # return richer objects under media_details. They are different fields.
+    media_url: list[str] = []
     created_at: datetime
     updated_at: datetime
     sent_at: Optional[datetime] = None
@@ -50,3 +53,52 @@ class Message(BaseModel):
     # Related objects
     number: Optional["Number"] = None
     contact: Optional["Contact"] = None
+
+
+class GroupMessage(BaseModel):
+    """
+    A message sent to a group conversation.
+
+    Group sends return a different shape to single sends: the recipients appear
+    as a participants list, and the identifiers are group-scoped rather than a
+    single message id.
+
+    Read-only. Not updatable or destroyable via API.
+    """
+
+    group_message_id: str
+    group_conversation_id: Optional[str] = None
+    direct_link: Optional[str] = None
+    direction: Optional[Literal["inbound", "outbound"]] = None
+    status: Optional[str] = None
+    participants: list[str] = []
+    body: Optional[str] = None
+    media_url: list[str] = []
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    sent_at: Optional[datetime] = None
+    number: Optional["Number"] = None
+
+
+class SmsTemplate(BaseModel):
+    """An SMS template belonging to the company, aggregated across agents."""
+
+    id: int
+    name: Optional[str] = None
+    body: Optional[str] = None
+
+
+class WhatsAppLineStatus(BaseModel):
+    """
+    WhatsApp registration and health status of a WhatsApp-capable Number.
+
+    Field names are camelCase because Aircall returns them that way on this
+    endpoint, unlike the snake_case used elsewhere in the API.
+    """
+
+    wabaId: Optional[str] = None
+    status: Optional[str] = None
+    canSendMessage: Optional[bool] = None
+    messagingLimitTier: Optional[str] = None
+    qualityRating: Optional[str] = None
+    businessVerificationStatus: Optional[str] = None

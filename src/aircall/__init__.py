@@ -15,6 +15,7 @@ from aircall.exceptions import (
     ValidationError,
 )
 from aircall.logging_config import configure_logging
+from aircall.pagination import Page, PageMeta
 
 __all__ = [
     # Client
@@ -33,6 +34,9 @@ __all__ = [
     # Connection exceptions
     "AircallConnectionError",
     "AircallTimeoutError",
+    # Pagination
+    "Page",
+    "PageMeta",
     # Logging
     "configure_logging",
 ]

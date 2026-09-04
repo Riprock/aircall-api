@@ -64,9 +64,9 @@ class UserV2(BaseModel):
     or 'unavailable' (Do Not Disturb or other unavailable status).
     """
 
-    substatus: str
+    substatus: Optional[str] = None
     """
-    Current substatus of the User.
+    Current substatus of the User. Absent from the Create a User V2 response.
     - If availability_status is 'available' or 'custom': substatus will be 'always_open'.
     - If availability_status is 'unavailable' without a selected reason: 'always_closed'.
     - If availability_status is 'unavailable' with a selected reason: the specific reason

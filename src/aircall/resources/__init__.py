@@ -1,5 +1,7 @@
 """Aircall API resource classes."""
 
+from aircall.resources.ai_voice_agent import AIVoiceAgentResource
+from aircall.resources.analytics import AnalyticsResource
 from aircall.resources.base import BaseResource
 from aircall.resources.call import CallResource
 from aircall.resources.company import CompanyResource
@@ -15,6 +17,8 @@ from aircall.resources.webhook import WebhookResource
 from aircall.resources.userv2 import UserV2Resource
 
 __all__ = [
+    "AIVoiceAgentResource",
+    "AnalyticsResource",
     "BaseResource",
     "CallResource",
     "CompanyResource",

@@ -47,3 +47,37 @@ class AIVoiceAgent(BaseModel):
 
     # Only for summary event - answers to intake questions
     extracted_data: Optional[Dict[str, Any]] = None
+
+
+class OutboundCallRequest(BaseModel):
+    """
+    An outbound call request queued for an AI Voice Agent.
+
+    Accepted with 202; the call is queued until a concurrency slot frees up.
+    Progresses through PENDING, INITIATED, IN_PROGRESS, then COMPLETED or FAILED.
+    """
+
+    id: str
+    idempotency_key: Optional[str] = None
+    status: Optional[Literal[
+        "PENDING", "INITIATED", "IN_PROGRESS", "COMPLETED", "FAILED"
+    ]] = None
+    virtual_agent_id: Optional[str] = None
+
+
+class CallAIVoiceAgent(BaseModel):
+    """
+    One AI Voice Agent segment attached to a Call.
+
+    Returned in the call object's ai_voice_agents array when fetch_aiva_conv is
+    set. A call can carry several segments when escalations are chained.
+    """
+
+    agent_id: Optional[str] = None
+    agent_name: Optional[str] = None
+    end_reason: Optional[str] = None
+    started_at: Optional[datetime] = None
+    ended_at: Optional[datetime] = None
+    escalation_reason: Optional[str] = None
+    # {"type": "branch"|"user"|"team"|"external", "destination": ...}
+    escalation_target: Optional[Dict[str, Any]] = None

@@ -11,7 +11,12 @@ from aircall.models.user import User, UserAvailability
 from aircall.models.userv2 import UserV2, UserV2Availability
 
 # AI and Intelligence
-from aircall.models.ai_voice_agent import AIVoiceAgent
+from aircall.models.ai_voice_agent import (
+    AIVoiceAgent,
+    CallAIVoiceAgent,
+    OutboundCallRequest,
+)
+from aircall.models.analytics import AnalyticsExport
 from aircall.models.content import (
     ActionItemsContent,
     Content,
@@ -27,7 +32,13 @@ from aircall.models.conversation_intelligence import (
 )
 
 # Communication
-from aircall.models.message import MediaDetail, Message
+from aircall.models.message import (
+    GroupMessage,
+    MediaDetail,
+    Message,
+    SmsTemplate,
+    WhatsAppLineStatus,
+)
 from aircall.models.webhook import Webhook
 
 # Campaign and Compliance
@@ -61,6 +72,9 @@ __all__ = [
     "Company",
     # AI and Intelligence
     "AIVoiceAgent",
+    "CallAIVoiceAgent",
+    "OutboundCallRequest",
+    "AnalyticsExport",
     "ConversationIntelligence",
     "RealtimeTranscription",
     "RealtimeTranscriptionCall",
@@ -73,6 +87,9 @@ __all__ = [
     # Communication
     "Message",
     "MediaDetail",
+    "GroupMessage",
+    "SmsTemplate",
+    "WhatsAppLineStatus",
     "Webhook",
     # Campaign and Compliance
     "DialerCampaign",
@@ -108,6 +125,7 @@ for _model in (
     CallComment,
     Team,
     Message,
+    GroupMessage,
     Integration,
     Contact,
 ):

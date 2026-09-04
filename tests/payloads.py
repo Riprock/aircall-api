@@ -48,6 +48,33 @@ USER_POSTED_BY = {
     "created_at": "2019-12-29T10:03:18.000Z",
 }
 
+# POST /v2/users -- note the absence of substatus
+USER_V2_CREATED = {
+    "id": 458,
+    "direct_link": "https://api.aircall.io/v2/users/458",
+    "name": "Jeffrey Curtis",
+    "email": "jeffrey.curtis@aircall.io",
+    "available": False,
+    "availability_status": "available",
+    "created_at": "2020-02-18T20:52:22.000Z",
+    "time_zone": "Etc/UTC",
+    "language": "en-US",
+    "wrap_up_time": 0,
+}
+
+# GET /v1/users/availabilities -- availability is a string, not booleans
+USER_AVAILABILITY = {"id": 456, "availability": "available"}
+
+# The meta object Aircall attaches to every paginated list response
+META = {
+    "count": 20,
+    "total": 2234,
+    "current_page": 1,
+    "per_page": 20,
+    "next_page_link": "https://api.aircall.io/v1/calls?page=2&per_page=20",
+    "previous_page_link": None,
+}
+
 NUMBER = {
     "id": 1234,
     "direct_link": "https://api.aircall.io/v1/numbers/1234",
@@ -196,4 +223,95 @@ DIALER_CAMPAIGN = {
             "created_at": "2020-01-02T11:41:01.000Z",
         }
     ],
+}
+
+
+# --- Phase 4: new endpoint responses -------------------------------------
+
+# POST /v1/numbers/:id/messages/group/send
+GROUP_MESSAGE = {
+    "group_message_id": "8f3c2c4e-9c6c-4c8e-9b4a-2c1f7e3d9c52",
+    "status": "pending",
+    "direct_link": "https://api.aircall.io/v1/numbers/123/messages/SM1",
+    "direction": "outbound",
+    "created_at": 1722317361216,
+    "sent_at": 1722317361216,
+    "updated_at": 1722317361216,
+    "group_conversation_id": "c4b8c1c0-0c6e-4c3f-9c1c-5c2f8e7a91d4",
+    "participants": ["+13000000001", "+13000000002"],
+    "media_url": [],
+    "body": "text you want to send",
+}
+
+# GET /v1/sms/templates
+SMS_TEMPLATE = {"id": 8821, "name": "order_update", "body": "Your order is on its way."}
+
+# GET /v1/numbers/:id/templates -- cursor pagination, no "meta" envelope
+WHATSAPP_TEMPLATES = {
+    "templates": [
+        {
+            "id": 1,
+            "wabaId": "123456789",
+            "name": "order_confirmation",
+            "category": "UTILITY",
+            "status": "APPROVED",
+            "language": "en",
+        }
+    ],
+    "pageInfo": {"currentToken": 0, "nextToken": 10, "totalCount": 50},
+}
+
+# GET /v1/numbers/:id/whatsapp_status
+WHATSAPP_STATUS = {
+    "wabaId": "123456789",
+    "status": "ONLINE",
+    "canSendMessage": True,
+    "messagingLimitTier": "TIER_1K",
+    "qualityRating": "GREEN",
+    "businessVerificationStatus": "VERIFIED",
+}
+
+# POST /v1/outbound-calls/agents/:agent_id -- 202 Accepted
+OUTBOUND_CALL = {
+    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "idempotency_key": "appt-reminder-2024-03-15-cust-12345",
+    "status": "PENDING",
+    "virtual_agent_id": "agent-abc123",
+}
+
+# POST /v1/analytics/report/export
+ANALYTICS_EXPORT_PENDING = {
+    "exportID": "9d3f2a1e-2b6c-4f0a-9c3e-1a2b3c4d5e6f",
+    "createdAt": "2026-05-20T09:35:12.000Z",
+    "status": "PENDING",
+}
+
+ANALYTICS_EXPORT_COMPLETE = {
+    "exportID": "9d3f2a1e-2b6c-4f0a-9c3e-1a2b3c4d5e6f",
+    "createdAt": "2026-05-20T09:35:12.000Z",
+    "status": "COMPLETED",
+    "format": "CSV",
+    "exportName": "calls-history-may-2026",
+    "isZipCompressed": False,
+    "downloadUrl": "https://aircall-analytics-exports.s3.amazonaws.com/x.csv",
+    "downloadUrlExpiresAt": "2026-05-20T10:35:12.000Z",
+}
+
+ANALYTICS_EXPORT_FAILED = {
+    "exportID": "9d3f2a1e-2b6c-4f0a-9c3e-1a2b3c4d5e6f",
+    "createdAt": "2026-05-20T09:35:12.000Z",
+    "status": "FAILED",
+    "errorMessage": "Report generation failed: too many rows",
+}
+
+# GET /v1/calls/:call_id/predicted_csat
+PREDICTED_CSAT = {
+    "csat": {
+        "call_id": 5237603,
+        "call_uuid": "CAFFEE343770a4b19d6289ebee7f406a7b",
+        "score": 75,
+        "drivers": [
+            {"polarity": "POSITIVE", "label": "Customer was satisfied"},
+        ],
+    }
 }

@@ -1,6 +1,7 @@
 """Resource module for managing dialer campaigns"""
+from aircall.pagination import Page
 from aircall.resources.base import BaseResource
-from aircall.models import DialerCampaign
+from aircall.models import DialerCampaign, DialerCampaignPhoneNumber
 
 
 class DialerCampaignResource(BaseResource):
@@ -49,18 +50,21 @@ class DialerCampaignResource(BaseResource):
         """
         return self._delete(f"/users/{user_id}/dialer_campaign")
 
-    def get_phone_numbers(self, user_id: int) -> list[dict]:
+    def get_phone_numbers(self, user_id: int) -> Page:
         """
         Retrieve phone numbers from a user's dialer campaign.
+
+        Aircall returns these under the "numbers" key; reading "phone_numbers"
+        silently yielded an empty list on every call.
 
         Args:
             user_id: The ID of the user
 
         Returns:
-            list[dict]: List of phone numbers in the campaign
+            Page: DialerCampaignPhoneNumber objects in the campaign
         """
         response = self._get(f"/users/{user_id}/dialer_campaign/phone_numbers")
-        return response.get("phone_numbers", [])
+        return self._as_page(response, "numbers", DialerCampaignPhoneNumber)
 
     def add_phone_numbers(self, user_id: int, phone_numbers: list[str]) -> dict:
         """

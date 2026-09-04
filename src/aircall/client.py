@@ -3,6 +3,8 @@
 import base64
 import logging
 import time
+from typing import Optional
+
 import requests
 from requests.exceptions import Timeout, ConnectionError as RequestsConnectionError
 
@@ -19,6 +21,8 @@ from aircall.exceptions import (
     ValidationError,
 )
 from aircall.resources import (
+    AIVoiceAgentResource,
+    AnalyticsResource,
     CallResource,
     CompanyResource,
     ContactResource,
@@ -48,24 +52,37 @@ class AircallClient:
 
     def __init__(
         self,
-        api_id: str,
-        api_token: str,
+        api_id: Optional[str] = None,
+        api_token: Optional[str] = None,
         timeout: int = 30,
-        verbose: bool = False
+        verbose: bool = False,
+        access_token: Optional[str] = None
     ) -> None:
         """
         Initialize the Aircall API client.
 
+        Aircall supports two authentication schemes. Aircall customers use Basic
+        Auth with an API ID and token; technology partners use OAuth 2.0 and pass
+        the access token they obtained for the account. Supply one or the other.
+
         Args:
-            api_id: Your Aircall API ID
-            api_token: Your Aircall API token
+            api_id: Your Aircall API ID (Basic Auth)
+            api_token: Your Aircall API token (Basic Auth)
             timeout: Default request timeout in seconds (default: 30)
             verbose: Enable verbose logging for debugging (default: False)
                     When True, sets the logger level to DEBUG
+            access_token: OAuth 2.0 access token, used instead of api_id/api_token
+
+        Raises:
+            ValueError: When no credentials are given, or when both schemes are
+
+        Example:
+            >>> AircallClient(api_id="id", api_token="token")     # Basic Auth
+            >>> AircallClient(access_token="oauth_access_token")  # OAuth 2.0
         """
         self.base_url = "https://api.aircall.io/v1"
         self.base_url_v2 = "https://api.aircall.io/v2"
-        credentials = base64.b64encode(f"{api_id}:{api_token}".encode()).decode('utf-8')
+        authorization = self._build_authorization(api_id, api_token, access_token)
         self.timeout = timeout
 
         # Initialize logger
@@ -87,11 +104,13 @@ class AircallClient:
                 aircall_logger.setLevel(logging.DEBUG)
 
         self.session = requests.Session()
-        self.session.headers.update({"Authorization": f"Basic {credentials}"})
+        self.session.headers.update({"Authorization": authorization})
 
         self.logger.info("Aircall client initialized")
 
         # Initialize resources
+        self.ai_voice_agent = AIVoiceAgentResource(self)
+        self.analytics = AnalyticsResource(self)
         self.call = CallResource(self)
         self.company = CompanyResource(self)
         self.contact = ContactResource(self)
@@ -104,6 +123,52 @@ class AircallClient:
         self.user = UserResource(self)
         self.userv2 = UserV2Resource(self)
         self.webhook = WebhookResource(self)
+
+    @staticmethod
+    def _build_authorization(
+        api_id: Optional[str], api_token: Optional[str], access_token: Optional[str]
+    ) -> str:
+        """
+        Build the Authorization header value for the credentials supplied.
+
+        Args:
+            api_id: Aircall API ID, for Basic Auth
+            api_token: Aircall API token, for Basic Auth
+            access_token: OAuth 2.0 access token
+
+        Returns:
+            str: Either "Bearer <token>" or "Basic <base64 id:token>"
+
+        Raises:
+            ValueError: When neither scheme is fully supplied, or both are
+        """
+        if access_token and (api_id or api_token):
+            raise ValueError(
+                "Pass either access_token (OAuth 2.0) or api_id and api_token "
+                "(Basic Auth), not both"
+            )
+        if access_token:
+            return f"Bearer {access_token}"
+        if api_id and api_token:
+            credentials = base64.b64encode(
+                f"{api_id}:{api_token}".encode()
+            ).decode('utf-8')
+            return f"Basic {credentials}"
+        raise ValueError(
+            "Authentication required: pass access_token, or both api_id and api_token"
+        )
+
+    def ping(self) -> dict:
+        """
+        Verify the configured credentials against the API.
+
+        Returns:
+            dict: {"ping": "pong"} when the credentials are accepted
+
+        Raises:
+            AuthenticationError: When the credentials are rejected
+        """
+        return self._request("GET", "/ping")
 
     def _base_url_for(self, version: str) -> str:
         """

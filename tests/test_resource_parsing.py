@@ -10,7 +10,7 @@ import pytest
 
 from aircall.models import (
     Call, Company, Contact, DialerCampaign, Integration, Message, Number,
-    Tag, Team, User, Webhook,
+    Tag, Team, User, UserV2, Webhook,
 )
 
 from tests import payloads
@@ -22,7 +22,14 @@ CASES = [
     ("user.list_users", {"users": [payloads.USER_FULL]},
      lambda c: c.user.list_users(), list),
     ("userv2.get", {"user": payloads.USER_FULL},
-     lambda c: c.userv2.get(456), User),
+     lambda c: c.userv2.get(456), UserV2),
+    ("userv2.get_numbers", {"numbers": [payloads.NUMBER_V2]},
+     lambda c: c.userv2.get_numbers(456), list),
+    ("user.get_availabilities", {"users": [payloads.USER_AVAILABILITY]},
+     lambda c: c.user.get_availabilities(), list),
+    ("dialer_campaign.get_phone_numbers",
+     {"numbers": payloads.DIALER_CAMPAIGN["phone_numbers"]},
+     lambda c: c.dialer_campaign.get_phone_numbers(456), list),
     ("userv2.list_users", {"users": [payloads.USER_FULL]},
      lambda c: c.userv2.list_users(), list),
     ("call.get", {"call": payloads.CALL},
@@ -86,21 +93,17 @@ def test_no_content_response_returns_empty_dict(client, respond):
     assert client.tag.delete(1) == {}
 
 
-@pytest.mark.xfail(
-    reason="Phase 4: send() reads response['message'], but Aircall returns the "
-           "message object at the top level with no envelope",
-    strict=True,
-)
 def test_message_send_parses_documented_response(client, respond):
+    """Aircall returns the message object unwrapped, with no "message" key."""
     respond(payloads.MESSAGE)
-    assert isinstance(client.message.send(123, "+130", "hi"), Message)
+    message = client.message.send_skipping_inbox(123, "+130", "hi")
+    assert isinstance(message, Message)
+    assert message.id == "messageId"
 
 
-@pytest.mark.xfail(
-    reason="Phase 2: get_numbers reads response['number_ids'], but /v2 returns "
-           "a paginated list under 'numbers'",
-    strict=True,
-)
 def test_userv2_get_numbers_returns_numbers(client, respond):
+    """/v2 returns full Number objects under "numbers", not a "number_ids" list."""
     respond({"numbers": [payloads.NUMBER_V2], "meta": {"total": 1}})
-    assert client.userv2.get_numbers(456)
+    numbers = client.userv2.get_numbers(456)
+    assert [n.id for n in numbers] == [1234]
+    assert numbers.meta.total == 1
