@@ -1,6 +1,7 @@
 """Resource module for managing tags"""
-from aircall.resources.base import BaseResource
 from aircall.models import Tag
+from aircall.pagination import DEFAULT_PER_PAGE, Page
+from aircall.resources.base import BaseResource
 
 
 class TagResource(BaseResource):
@@ -11,19 +12,18 @@ class TagResource(BaseResource):
     Note: Emojis cannot be used in tag attributes and will be removed.
     """
 
-    def list_tags(self, page: int = 1, per_page: int = 20) -> list[Tag]:
+    def list_tags(self, page: int = 1, per_page: int = DEFAULT_PER_PAGE) -> Page:
         """
         List all tags with pagination.
 
         Args:
             page: Page number (default 1)
-            per_page: Results per page (default 20, max 50)
+            per_page: Results per page (1-50, default 20)
 
         Returns:
-            list[Tag]: List of Tag objects
+            Page: Tag objects, carrying .meta pagination details
         """
-        response = self._get("/tags", params={"page": page, "per_page": per_page})
-        return [Tag(**t) for t in response["tags"]]
+        return self._list("/tags", "tags", Tag, page=page, per_page=per_page)
 
     def get(self, tag_id: int) -> Tag:
         """
@@ -38,7 +38,7 @@ class TagResource(BaseResource):
         response = self._get(f"/tags/{tag_id}")
         return Tag(**response["tag"])
 
-    def create(self, name: str, color: str, description: str = None) -> Tag:
+    def create(self, name: str, color: str, description: str | None = None) -> Tag:
         """
         Create a new tag.
 

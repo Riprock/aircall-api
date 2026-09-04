@@ -1,6 +1,7 @@
 """Resource module for managing contacts"""
-from aircall.resources.base import BaseResource
 from aircall.models import Contact
+from aircall.pagination import DEFAULT_PER_PAGE, Page
+from aircall.resources.base import BaseResource
 
 
 class ContactResource(BaseResource):
@@ -10,21 +11,20 @@ class ContactResource(BaseResource):
     Handles operations relating to contacts including phone numbers and emails.
     """
 
-    def list_contacts(self, page: int = 1, per_page: int = 20) -> list[Contact]:
+    def list_contacts(self, page: int = 1, per_page: int = DEFAULT_PER_PAGE) -> Page:
         """
         List all contacts with pagination.
 
         Args:
             page: Page number (default 1)
-            per_page: Results per page (default 20, max 50)
+            per_page: Results per page (1-50, default 20)
 
         Returns:
-            list[Contact]: List of Contact objects
+            Page: Contact objects, carrying .meta pagination details
         """
-        response = self._get("/contacts", params={"page": page, "per_page": per_page})
-        return [Contact(**c) for c in response["contacts"]]
+        return self._list("/contacts", "contacts", Contact, page=page, per_page=per_page)
 
-    def search(self, **params) -> list[Contact]:
+    def search(self, page: int = 1, per_page: int = DEFAULT_PER_PAGE, **params) -> Page:
         """
         Search for contacts with various filters.
 
@@ -32,10 +32,11 @@ class ContactResource(BaseResource):
             **params: Search parameters (phone_number, email, etc.)
 
         Returns:
-            list[Contact]: List of Contact objects matching the search criteria
+            Page: matching Contact objects, carrying .meta pagination details
         """
-        response = self._get("/contacts/search", params=params)
-        return [Contact(**c) for c in response["contacts"]]
+        return self._list(
+            "/contacts/search", "contacts", Contact, page=page, per_page=per_page, params=params
+        )
 
     def get(self, contact_id: int) -> Contact:
         """
@@ -52,10 +53,10 @@ class ContactResource(BaseResource):
 
     def create(
         self,
-        first_name: str = None,
-        last_name: str = None,
-        phone_numbers: list[dict] = None,
-        emails: list[dict] = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        phone_numbers: list[dict] | None = None,
+        emails: list[dict] | None = None,
         **kwargs
     ) -> Contact:
         """
@@ -129,7 +130,7 @@ class ContactResource(BaseResource):
         """
         return self._delete(f"/contacts/{contact_id}")
 
-    def add_phone_number(self, contact_id: int, value: str, label: str = None) -> dict:
+    def add_phone_number(self, contact_id: int, value: str, label: str | None = None) -> dict:
         """
         Add a phone number to a contact.
 
@@ -147,7 +148,7 @@ class ContactResource(BaseResource):
         return self._post(f"/contacts/{contact_id}/phone_details", json=data)
 
     def update_phone_number(self, contact_id: int, phone_number_id: int,
-                          value: str = None, label: str = None) -> dict:
+                          value: str | None = None, label: str | None = None) -> dict:
         """
         Update a phone number from a contact.
 
@@ -180,7 +181,7 @@ class ContactResource(BaseResource):
         """
         return self._delete(f"/contacts/{contact_id}/phone_details/{phone_number_id}")
 
-    def add_email(self, contact_id: int, value: str, label: str = None) -> dict:
+    def add_email(self, contact_id: int, value: str, label: str | None = None) -> dict:
         """
         Add an email to a contact.
 
@@ -198,7 +199,7 @@ class ContactResource(BaseResource):
         return self._post(f"/contacts/{contact_id}/email_details", json=data)
 
     def update_email(self, contact_id: int, email_id: int,
-                    value: str = None, label: str = None) -> dict:
+                    value: str | None = None, label: str | None = None) -> dict:
         """
         Update an email from a contact.
 

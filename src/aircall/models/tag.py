@@ -1,5 +1,4 @@
 """Tag models for Aircall API."""
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -15,4 +14,4 @@ class Tag(BaseModel):
     direct_link: str
     name: str
     color: str  # Hexadecimal format (e.g., "#FF5733")
-    description: Optional[str] = None
+    description: str | None = None

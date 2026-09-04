@@ -1,6 +1,6 @@
 """User models for Aircall API."""
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel
 
@@ -24,25 +24,31 @@ class User(BaseModel):
     # Availability fields
     available: bool  # Based on working hours
     availability_status: Literal["available", "custom", "unavailable"]
-    substatus: str  # always_open, always_closed, or specific reason
+    # Omitted from user objects nested inside Call payloads
+    substatus: str | None = None  # always_open, always_closed, or specific reason
 
     # Related resources
     numbers: list["Number"] = []
 
     # Settings
-    time_zone: str  # Default: Etc/UTC
-    language: str  # IETF language tag, default: en-US
-    wrap_up_time: int  # Timer after call ends (seconds)
+    # All three are omitted from abridged user objects nested in other payloads
+    # (Call.user, Call.comments[].posted_by), so they cannot be required.
+    time_zone: str | None = None  # Default: Etc/UTC
+    language: str | None = None  # IETF language tag, default: en-US
+    wrap_up_time: int | None = None  # Timer after call ends (seconds)
 
 
 class UserAvailability(BaseModel):
     """
-    Granular availability status for a user.
+    Granular availability status for a User.
 
-    Use the dedicated endpoint to retrieve these statuses.
+    Aircall reports this as a single string, not a set of booleans:
+    GET /v1/users/:id/availability returns {"availability": "after_call_work"},
+    and GET /v1/users/availabilities returns the same object per user with an id.
+
+    Documented values are available, offline, do_not_disturb, in_call and
+    after_call_work. Left as a plain str rather than a Literal so a value Aircall
+    adds later does not break parsing.
     """
-    available: Optional[bool] = None  # Ready to answer calls
-    offline: Optional[bool] = None  # Not online
-    do_not_disturb: Optional[bool] = None  # DND toggled
-    in_call: Optional[bool] = None  # Currently on a call
-    after_call_work: Optional[bool] = None  # Tagging/wrapping up
+    id: int | None = None  # Absent on the single-user endpoint
+    availability: str

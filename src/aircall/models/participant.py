@@ -1,5 +1,5 @@
 """Participant models for Aircall API."""
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -11,10 +11,10 @@ class Participant(BaseModel):
     Referenced as 'conference_participants' in Call APIs
     and as 'participants' in call webhook events.
     """
-    id: Optional[str] = None  # Contact or User ID (not present for external)
+    id: str | None = None  # Contact or User ID (not present for external)
     type: Literal["user", "contact", "external"]
-    name: Optional[str] = None  # Not present for external
-    phone_number: Optional[str] = None  # Not present for user type
+    name: str | None = None  # Not present for external
+    phone_number: str | None = None  # Not present for user type
 
 
 class ConversationIntelligenceParticipant(BaseModel):
@@ -26,13 +26,13 @@ class ConversationIntelligenceParticipant(BaseModel):
     participant_type: Literal["internal", "external", "ai_voice_agent"]
 
     # Not present for internal or ai_voice_agent
-    phone_number: Optional[str] = None
+    phone_number: str | None = None
 
     # Sentiment value (only for sentiment.created event)
-    value: Optional[Literal["NEUTRAL", "POSITIVE", "NEGATIVE"]] = None
+    value: Literal["NEUTRAL", "POSITIVE", "NEGATIVE"] | None = None
 
     # User ID (only for transcription.created, not for external/ai_voice_agent)
-    user_id: Optional[str] = None
+    user_id: str | None = None
 
     # AI Voice Agent ID (only for transcription.created, only for ai_voice_agent type)
-    ai_voice_agent_id: Optional[str] = None
+    ai_voice_agent_id: str | None = None

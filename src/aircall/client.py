@@ -3,8 +3,10 @@
 import base64
 import logging
 import time
+
 import requests
-from requests.exceptions import Timeout, ConnectionError as RequestsConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import Timeout
 
 from aircall.exceptions import (
     AircallAPIError,
@@ -19,6 +21,8 @@ from aircall.exceptions import (
     ValidationError,
 )
 from aircall.resources import (
+    AIVoiceAgentResource,
+    AnalyticsResource,
     CallResource,
     CompanyResource,
     ContactResource,
@@ -29,6 +33,7 @@ from aircall.resources import (
     TagResource,
     TeamResource,
     UserResource,
+    UserV2Resource,
     WebhookResource,
 )
 
@@ -47,23 +52,37 @@ class AircallClient:
 
     def __init__(
         self,
-        api_id: str,
-        api_token: str,
+        api_id: str | None = None,
+        api_token: str | None = None,
         timeout: int = 30,
-        verbose: bool = False
+        verbose: bool = False,
+        access_token: str | None = None
     ) -> None:
         """
         Initialize the Aircall API client.
 
+        Aircall supports two authentication schemes. Aircall customers use Basic
+        Auth with an API ID and token; technology partners use OAuth 2.0 and pass
+        the access token they obtained for the account. Supply one or the other.
+
         Args:
-            api_id: Your Aircall API ID
-            api_token: Your Aircall API token
+            api_id: Your Aircall API ID (Basic Auth)
+            api_token: Your Aircall API token (Basic Auth)
             timeout: Default request timeout in seconds (default: 30)
             verbose: Enable verbose logging for debugging (default: False)
                     When True, sets the logger level to DEBUG
+            access_token: OAuth 2.0 access token, used instead of api_id/api_token
+
+        Raises:
+            ValueError: When no credentials are given, or when both schemes are
+
+        Example:
+            >>> AircallClient(api_id="id", api_token="token")     # Basic Auth
+            >>> AircallClient(access_token="oauth_access_token")  # OAuth 2.0
         """
         self.base_url = "https://api.aircall.io/v1"
-        credentials = base64.b64encode(f"{api_id}:{api_token}".encode()).decode('utf-8')
+        self.base_url_v2 = "https://api.aircall.io/v2"
+        authorization = self._build_authorization(api_id, api_token, access_token)
         self.timeout = timeout
 
         # Initialize logger
@@ -85,11 +104,13 @@ class AircallClient:
                 aircall_logger.setLevel(logging.DEBUG)
 
         self.session = requests.Session()
-        self.session.headers.update({"Authorization": f"Basic {credentials}"})
+        self.session.headers.update({"Authorization": authorization})
 
         self.logger.info("Aircall client initialized")
 
         # Initialize resources
+        self.ai_voice_agent = AIVoiceAgentResource(self)
+        self.analytics = AnalyticsResource(self)
         self.call = CallResource(self)
         self.company = CompanyResource(self)
         self.contact = ContactResource(self)
@@ -100,15 +121,83 @@ class AircallClient:
         self.tag = TagResource(self)
         self.team = TeamResource(self)
         self.user = UserResource(self)
+        self.userv2 = UserV2Resource(self)
         self.webhook = WebhookResource(self)
+
+    @staticmethod
+    def _build_authorization(
+        api_id: str | None, api_token: str | None, access_token: str | None
+    ) -> str:
+        """
+        Build the Authorization header value for the credentials supplied.
+
+        Args:
+            api_id: Aircall API ID, for Basic Auth
+            api_token: Aircall API token, for Basic Auth
+            access_token: OAuth 2.0 access token
+
+        Returns:
+            str: Either "Bearer <token>" or "Basic <base64 id:token>"
+
+        Raises:
+            ValueError: When neither scheme is fully supplied, or both are
+        """
+        if access_token and (api_id or api_token):
+            raise ValueError(
+                "Pass either access_token (OAuth 2.0) or api_id and api_token "
+                "(Basic Auth), not both"
+            )
+        if access_token:
+            return f"Bearer {access_token}"
+        if api_id and api_token:
+            credentials = base64.b64encode(
+                f"{api_id}:{api_token}".encode()
+            ).decode('utf-8')
+            return f"Basic {credentials}"
+        raise ValueError(
+            "Authentication required: pass access_token, or both api_id and api_token"
+        )
+
+    def ping(self) -> dict:
+        """
+        Verify the configured credentials against the API.
+
+        Returns:
+            dict: {"ping": "pong"} when the credentials are accepted
+
+        Raises:
+            AuthenticationError: When the credentials are rejected
+        """
+        return self._request("GET", "/ping")
+
+    def _base_url_for(self, version: str) -> str:
+        """
+        Resolve an API version to its root URL.
+
+        Args:
+            version: API version identifier, "v1" or "v2"
+
+        Returns:
+            str: Root URL for that version, without a trailing slash
+
+        Raises:
+            ValueError: When the version is not one Aircall exposes
+        """
+        try:
+            return {"v1": self.base_url, "v2": self.base_url_v2}[version]
+        except KeyError:
+            raise ValueError(
+                f"Unknown Aircall API version {version!r}, expected 'v1' or 'v2'"
+            ) from None
 
     def _request(
         self,
         method: str,
         endpoint: str,
-        params: dict = None,
-        json: dict = None,
-        timeout: int = None
+        params: dict | None = None,
+        json: dict | None = None,
+        timeout: int | None = None,
+        version: str = "v1"
     ) -> dict:
         """
         Make an HTTP request to the Aircall API.
@@ -119,11 +208,13 @@ class AircallClient:
             params: Query parameters as dict (e.g., {"page": 1, "per_page": 50})
             json: Request body as dict for POST/PUT requests
             timeout: Request timeout in seconds (uses self.timeout if not specified)
+            version: Aircall API version to route to, "v1" or "v2" (default: "v1")
 
         Returns:
             dict: Parsed JSON response
 
         Raises:
+            ValueError: When an unknown API version is requested
             ValidationError: When request validation fails (400)
             AuthenticationError: When authentication fails (401 or 403)
             NotFoundError: When resource is not found (404)
@@ -134,7 +225,7 @@ class AircallClient:
             AircallTimeoutError: When request times out
             AircallAPIError: For other API errors
         """
-        url = self.base_url + endpoint
+        url = self._base_url_for(version) + endpoint
 
         # Log the request details
         self.logger.debug("Request: %s %s", method, url)
@@ -170,7 +261,7 @@ class AircallClient:
                 method, url, str(e), elapsed
             )
             raise AircallConnectionError(
-                f"Failed to connect to {url}: {str(e)}"
+                f"Failed to connect to {url}: {e!s}"
             ) from e
 
         elapsed = time.time() - start_time
@@ -196,8 +287,9 @@ class AircallClient:
             if isinstance(error_data, dict):
                 # Try to get message from various possible fields
                 error_message = error_data.get('message') or error_data.get('error') or error_message
-        except Exception:
-            # If response is not JSON, use text content
+        except ValueError:
+            # Body was not JSON. requests raises JSONDecodeError, which
+            # subclasses ValueError; fall back to the raw text.
             if response.text:
                 error_message = response.text
 

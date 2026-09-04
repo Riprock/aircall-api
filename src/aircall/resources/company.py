@@ -1,6 +1,6 @@
 """Resource module for managing company information"""
-from aircall.resources.base import BaseResource
 from aircall.models import Company
+from aircall.resources.base import BaseResource
 
 
 class CompanyResource(BaseResource):

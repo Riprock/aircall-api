@@ -1,16 +1,15 @@
 """Integration models for Aircall API."""
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
-if TYPE_CHECKING:
-    from aircall.models.user import User
+from aircall.models.user import User
 
 
 class Integration(BaseModel):
     """Integration object representing connection state with third-party services"""
     name: str
-    custom_name: Optional[str] = None
+    custom_name: str | None = None
     logo: str
     company_id: int
     status: str

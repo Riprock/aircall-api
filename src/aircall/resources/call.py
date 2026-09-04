@@ -1,6 +1,16 @@
 """Resource module for managing calls"""
-from aircall.resources.base import BaseResource
+
+from aircall.deprecation import (
+    REALTIME_TRANSCRIPTION_SUNSET,
+    warn_deprecated,
+)
 from aircall.models import Call
+from aircall.pagination import DEFAULT_PER_PAGE, Page
+from aircall.resources.base import BaseResource
+
+#: Values Aircall accepts for the transcription "mode" query param.
+TRANSCRIPTION_MODES = frozenset({"async", "realtime"})
+
 
 class CallResource(BaseResource):
     """
@@ -8,47 +18,68 @@ class CallResource(BaseResource):
 
     Handles operations relating to calls including status, voicemails, insights and summaries
     """
-    def list_calls(self, page: int = 1, per_page: int = 20) -> list[Call]:
+    def list_calls(
+        self, page: int = 1, per_page: int = DEFAULT_PER_PAGE, **params
+    ) -> Page:
         """
         List all calls with pagination.
 
+        Only six months of history is available, and pagination caps out at
+        10,000 calls -- use the ``from`` filter to reach older calls.
+
         Args:
             page: Page number (default 1)
-            per_page: Results per page (default 20, max 50)
+            per_page: Results per page (1-50, default 20)
+            **params: Query filters. Aircall accepts:
+                from (int): minimum creation date, UNIX timestamp
+                to (int): maximum creation date, UNIX timestamp
+                order (str): "asc" or "desc" by created_at (default "asc")
+                fetch_contact (bool): include contact details
+                fetch_short_urls (bool): include recording/voicemail short URLs
+                fetch_call_timeline (bool): include ivr_options_selected
+                fetch_aiva_conv (bool): include ai_voice_agents
 
         Returns:
-            list[Call]: List of Call objects
+            Page: Call objects, carrying .meta pagination details
         """
-        response = self._get("/calls", params={"page": page, "per_page": per_page})
-        return [Call(**c) for c in response["calls"]]
+        return self._list(
+            "/calls", "calls", Call, page=page, per_page=per_page, params=params
+        )
 
-    def get(self, call_id: int) -> Call:
+    def get(self, call_id: int, **params) -> Call:
         """
         Get a specific call by ID.
 
         Args:
             call_id: The ID of the call to retrieve
+            **params: Query toggles -- fetch_contact, fetch_short_urls,
+                fetch_call_timeline, fetch_aiva_conv
 
         Returns:
             Call: The call object
         """
-        response = self._get(f"/calls/{call_id}")
+        response = self._get(f"/calls/{call_id}", params=params or None)
         return Call(**response["call"])
 
-    def search(self, **params) -> list[Call]:
+    def search(self, page: int = 1, per_page: int = DEFAULT_PER_PAGE, **params) -> Page:
         """
         Search for calls with various filters.
 
         Args:
-            **params: Search parameters (from, to, tags, etc.)
+            page: Page number (default 1)
+            per_page: Results per page (1-50, default 20)
+            **params: Search filters. Accepts the same options as list_calls()
+                (from, to, order, fetch_contact, fetch_short_urls,
+                fetch_call_timeline, fetch_aiva_conv) plus search terms.
 
         Returns:
-            list[Call]: List of Call objects matching the search criteria
+            Page: matching Call objects, carrying .meta pagination details
         """
-        response = self._get("/calls/search", params=params)
-        return [Call(**c) for c in response["calls"]]
+        return self._list(
+            "/calls/search", "calls", Call, page=page, per_page=per_page, params=params
+        )
 
-    def transfer(self, call_id: int, number_id: int, comment: str = None) -> dict:
+    def transfer(self, call_id: int, number_id: int, comment: str | None = None) -> dict:
         """
         Transfer a call to another number.
 
@@ -185,21 +216,39 @@ class CallResource(BaseResource):
         """
         return self._post(f"/calls/{call_id}/insight_cards", json={"cards": cards})
 
-    def get_transcription(self, call_id: int) -> dict:
+    def get_transcription(self, call_id: int, mode: str | None = None) -> dict:
         """
         Get the transcription of a call.
 
+        This is the migration target for get_realtime_transcription(): pass
+        mode="realtime" to fetch the transcription generated for the agent
+        during the call.
+
         Args:
             call_id: The ID of the call
+            mode: Transcription mode, "async" or "realtime". Omit for Aircall's
+                default.
 
         Returns:
             dict: Transcription data
+
+        Raises:
+            ValueError: When mode is not one Aircall accepts
         """
-        return self._get(f"/calls/{call_id}/transcription")
+        if mode is not None and mode not in TRANSCRIPTION_MODES:
+            raise ValueError(
+                f"mode must be one of {sorted(TRANSCRIPTION_MODES)}, got {mode!r}"
+            )
+        params = {"mode": mode} if mode is not None else None
+        return self._get(f"/calls/{call_id}/transcription", params=params)
 
     def get_realtime_transcription(self, call_id: int) -> dict:
         """
         Get the real-time transcription of a call.
+
+        .. deprecated:: 2.0.0
+            Aircall's removal date for this endpoint was 2026-03-31 and has
+            passed. Use ``get_transcription(call_id, mode="realtime")``.
 
         Args:
             call_id: The ID of the call
@@ -207,7 +256,36 @@ class CallResource(BaseResource):
         Returns:
             dict: Real-time transcription data
         """
+        warn_deprecated(
+            "CallResource.get_realtime_transcription()",
+            'get_transcription(call_id, mode="realtime")',
+            REALTIME_TRANSCRIPTION_SUNSET,
+        )
         return self._get(f"/calls/{call_id}/realtime_transcription")
+
+    def get_predicted_csat(self, call_id: int) -> dict:
+        """
+        Retrieve the Predicted CSAT score and its drivers for a call.
+
+        Args:
+            call_id: The ID of the call
+
+        Returns:
+            dict: {"csat": {"score": int, "drivers": [...], ...}}
+        """
+        return self._get(f"/calls/{call_id}/predicted_csat")
+
+    def get_custom_summary_result(self, call_id: int) -> dict:
+        """
+        Retrieve the custom summary result for a call.
+
+        Args:
+            call_id: The ID of the call
+
+        Returns:
+            dict: The custom summary, including summary_template_results
+        """
+        return self._get(f"/calls/{call_id}/custom_summary_result")
 
     def get_sentiments(self, call_id: int) -> dict:
         """
@@ -257,7 +335,9 @@ class CallResource(BaseResource):
         """
         return self._get(f"/calls/{call_id}/action_items")
 
-    def get_playbook_result(self, call_id: int) -> dict:
+    def get_playbook_result(
+        self, call_id: int, fetch_playbook: bool | None = None
+    ) -> dict:
         """
         Get playbook results for a call.
 
@@ -267,7 +347,8 @@ class CallResource(BaseResource):
         Returns:
             dict: Playbook result data
         """
-        return self._get(f"/calls/{call_id}/playbook_result")
+        params = {"fetch_playbook": fetch_playbook} if fetch_playbook is not None else None
+        return self._get(f"/calls/{call_id}/playbook_result", params=params)
 
     def get_evaluation(self, call_id: int) -> dict:
         """
@@ -276,4 +357,4 @@ class CallResource(BaseResource):
         Args:
             call_id: The ID of the call
         """
-        return self._get(f"/calls/{call_id}/evaluation")
+        return self._get(f"/calls/{call_id}/evaluations")

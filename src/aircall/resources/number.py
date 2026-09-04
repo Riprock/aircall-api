@@ -1,7 +1,8 @@
 """Number resource for managing Aircall phone numbers."""
 
-from aircall.resources.base import BaseResource
 from aircall.models import Number
+from aircall.pagination import DEFAULT_PER_PAGE, Page
+from aircall.resources.base import BaseResource
 
 
 class NumberResource(BaseResource):
@@ -12,16 +13,16 @@ class NumberResource(BaseResource):
     retrieving, updating, and checking registration status.
     """
 
-    def list_numbers(self, page: int = 1, per_page: int = 20) -> list[Number]:
+    def list_numbers(self, page: int = 1, per_page: int = DEFAULT_PER_PAGE) -> Page:
         """
         List all numbers with pagination.
 
         Args:
             page: Page number (default 1)
-            per_page: Results per page (default 20, max 50)
+            per_page: Results per page (1-50, default 20)
 
         Returns:
-            list[Number]: List of Number objects
+            Page: Number objects, carrying .meta pagination details
 
         Note:
             Response includes pagination metadata in 'meta' field:
@@ -36,8 +37,7 @@ class NumberResource(BaseResource):
             >>> for number in numbers:
             ...     print(number.name, number.digits)
         """
-        response = self._get("/numbers", params={"page": page, "per_page": per_page})
-        return [Number(**n) for n in response["numbers"]]
+        return self._list("/numbers", "numbers", Number, page=page, per_page=per_page)
 
     def get(self, number_id: int) -> Number:
         """

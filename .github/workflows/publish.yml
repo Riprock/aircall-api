@@ -13,14 +13,22 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
 
       - uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      # Gate the release on the suite. 1.2.0 shipped with most read paths
+      # broken because nothing ran before publishing.
+      - name: Run tests
+        run: uv run pytest -q
 
       - name: Build package
         run: uv build
