@@ -104,7 +104,15 @@ class AircallClient:
                 aircall_logger.setLevel(logging.DEBUG)
 
         self.session = requests.Session()
-        self.session.headers.update({"Authorization": authorization})
+        self.session.headers.update({
+            "Authorization": authorization,
+            # Some endpoints (registration_status, messages/configuration)
+            # reject a bodyless request without it. requests only sets this
+            # header when it serialises a body, so GET and DELETE would
+            # otherwise go out with none. Passing json= sets the same value
+            # on the prepared request, so bodies are unaffected.
+            "Content-Type": "application/json",
+        })
 
         self.logger.info("Aircall client initialized")
 
